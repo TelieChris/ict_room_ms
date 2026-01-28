@@ -1,0 +1,52 @@
+:root{
+  --gs-primary:#0d6efd;
+  --gs-sidebar:#0b1f3a;
+  --gs-sidebar-muted:rgba(255,255,255,.75);
+}
+
+body{
+  background:#f5f7fb;
+}
+
+.app-shell{
+  min-height:100vh;
+}
+
+.sidebar{
+  width:260px;
+  background:var(--gs-sidebar);
+}
+
+.sidebar .brand{
+  font-weight:700;
+  letter-spacing:.2px;
+}
+
+.sidebar .nav-link{
+  color:var(--gs-sidebar-muted);
+  border-radius:.5rem;
+  padding:.55rem .75rem;
+}
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active{
+  color:#fff;
+  background:rgba(255,255,255,.12);
+}
+
+.content{
+  width:100%;
+}
+
+.card-stat{
+  border:0;
+  box-shadow:0 6px 18px rgba(16,24,40,.06);
+}
+
+.table-card{
+  border:0;
+  box-shadow:0 6px 18px rgba(16,24,40,.06);
+}
+
+
+
+

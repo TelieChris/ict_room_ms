@@ -1,0 +1,237 @@
+<?php
+
+require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../../includes/db.php';
+require_once __DIR__ . '/../../includes/audit.php';
+require_once __DIR__ . '/../../includes/url.php';
+
+require_login();
+require_role(['admin','teacher']);
+
+$pdo = db();
+$id = (int)($_GET['id'] ?? 0);
+
+$stmt = $pdo->prepare("
+  SELECT *
+  FROM assets
+  WHERE id = :id
+  LIMIT 1
+");
+$stmt->execute([':id' => $id]);
+$asset = $stmt->fetch();
+if (!$asset) {
+  http_response_code(404);
+  die('Asset not found.');
+}
+
+$categories = $pdo->query("SELECT id, name FROM asset_categories ORDER BY name")->fetchAll();
+$locations = $pdo->query("SELECT id, name FROM locations ORDER BY name")->fetchAll();
+
+$errors = [];
+
+function v(string $k, $fallback = '')
+{
+  return $_POST[$k] ?? $fallback;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $asset_code = trim((string)v('asset_code', $asset['asset_code']));
+  $asset_name = trim((string)v('asset_name', $asset['asset_name']));
+  $category_id = (int)v('category_id', $asset['category_id']);
+  $brand = trim((string)v('brand', $asset['brand']));
+  $model = trim((string)v('model', $asset['model']));
+  $serial_number = trim((string)v('serial_number', $asset['serial_number']));
+  $purchase_date = trim((string)v('purchase_date', $asset['purchase_date']));
+  $asset_condition = (string)v('asset_condition', $asset['asset_condition']);
+  $status = (string)v('status', $asset['status']);
+  $location_id = (int)v('location_id', $asset['location_id']);
+  $notes = trim((string)v('notes', $asset['notes']));
+
+  if ($asset_code === '') $errors[] = 'Asset code is required.';
+  if ($asset_name === '') $errors[] = 'Asset name is required.';
+  if ($category_id <= 0) $errors[] = 'Category is required.';
+  if ($location_id <= 0) $errors[] = 'Location is required.';
+
+  $image_path = $asset['image_path'];
+  if (!empty($_FILES['image']['name'])) {
+    if (!is_dir(UPLOAD_DIR)) @mkdir(UPLOAD_DIR, 0755, true);
+    $tmp = $_FILES['image']['tmp_name'] ?? '';
+    $size = (int)($_FILES['image']['size'] ?? 0);
+    if (!is_uploaded_file($tmp)) {
+      $errors[] = 'Invalid image upload.';
+    } elseif ($size > 2 * 1024 * 1024) {
+      $errors[] = 'Image too large (max 2MB).';
+    } else {
+      $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+      if (!in_array($ext, ['jpg','jpeg','png','webp'], true)) {
+        $errors[] = 'Image must be JPG, PNG, or WEBP.';
+      } else {
+        $filename = 'asset_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+        $dest = UPLOAD_DIR . $filename;
+        if (!move_uploaded_file($tmp, $dest)) {
+          $errors[] = 'Failed to save uploaded image.';
+        } else {
+          $image_path = UPLOAD_URL_PREFIX . $filename;
+        }
+      }
+    }
+  }
+
+  if (!$errors) {
+    try {
+      $stmt = $pdo->prepare("
+        UPDATE assets SET
+          asset_code=:asset_code,
+          asset_name=:asset_name,
+          category_id=:category_id,
+          brand=:brand,
+          model=:model,
+          serial_number=:serial_number,
+          purchase_date=:purchase_date,
+          asset_condition=:asset_condition,
+          status=:status,
+          location_id=:location_id,
+          image_path=:image_path,
+          notes=:notes
+        WHERE id=:id
+      ");
+      $stmt->execute([
+        ':asset_code' => $asset_code,
+        ':asset_name' => $asset_name,
+        ':category_id' => $category_id,
+        ':brand' => $brand ?: null,
+        ':model' => $model ?: null,
+        ':serial_number' => $serial_number ?: null,
+        ':purchase_date' => $purchase_date ?: null,
+        ':asset_condition' => $asset_condition,
+        ':status' => $status,
+        ':location_id' => $location_id,
+        ':image_path' => $image_path ?: null,
+        ':notes' => $notes ?: null,
+        ':id' => $id,
+      ]);
+      audit_log('ASSET_UPDATE', 'assets', $id, "Updated asset {$asset_code}");
+      header('Location: ' . url('/admin/assets/index.php'));
+      exit;
+    } catch (Throwable $e) {
+      $errors[] = 'Failed to update asset. (Possible duplicate asset code.)';
+    }
+  }
+}
+
+layout_header('Edit Asset', 'assets');
+?>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-1">Edit Asset</h1>
+    <div class="text-secondary"><?php echo htmlspecialchars($asset['asset_code']); ?> • <?php echo htmlspecialchars($asset['asset_name']); ?></div>
+  </div>
+  <a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars(url('/admin/assets/index.php')); ?>">
+    <i class="bi bi-arrow-left me-1"></i> Back
+  </a>
+</div>
+
+<?php if ($errors): ?>
+  <div class="alert alert-danger">
+    <div class="fw-semibold mb-1">Please fix the following:</div>
+    <ul class="mb-0">
+      <?php foreach ($errors as $err): ?><li><?php echo htmlspecialchars($err); ?></li><?php endforeach; ?>
+    </ul>
+  </div>
+<?php endif; ?>
+
+<div class="card table-card">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Asset Code</label>
+        <input class="form-control" name="asset_code" required value="<?php echo htmlspecialchars(v('asset_code', $asset['asset_code'])); ?>">
+      </div>
+      <div class="col-12 col-md-8">
+        <label class="form-label">Asset Name</label>
+        <input class="form-control" name="asset_name" required value="<?php echo htmlspecialchars(v('asset_name', $asset['asset_name'])); ?>">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Category</label>
+        <select class="form-select" name="category_id" required>
+          <option value="">Select...</option>
+          <?php foreach ($categories as $c): ?>
+            <option value="<?php echo (int)$c['id']; ?>" <?php echo ((int)v('category_id', $asset['category_id']) === (int)$c['id']) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($c['name']); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Brand</label>
+        <input class="form-control" name="brand" value="<?php echo htmlspecialchars(v('brand', $asset['brand'])); ?>">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Model</label>
+        <input class="form-control" name="model" value="<?php echo htmlspecialchars(v('model', $asset['model'])); ?>">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Serial Number</label>
+        <input class="form-control" name="serial_number" value="<?php echo htmlspecialchars(v('serial_number', $asset['serial_number'])); ?>">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Purchase Date</label>
+        <input type="date" class="form-control" name="purchase_date" value="<?php echo htmlspecialchars(v('purchase_date', $asset['purchase_date'])); ?>">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Condition</label>
+        <select class="form-select" name="asset_condition">
+          <?php foreach (['New','Good','Fair','Damaged'] as $cnd): ?>
+            <option value="<?php echo htmlspecialchars($cnd); ?>" <?php echo (v('asset_condition', $asset['asset_condition']) === $cnd) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($cnd); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Status</label>
+        <select class="form-select" name="status">
+          <?php foreach (['Available','In Use','Maintenance','Lost'] as $s): ?>
+            <option value="<?php echo htmlspecialchars($s); ?>" <?php echo (v('status', $asset['status']) === $s) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($s); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Location</label>
+        <select class="form-select" name="location_id" required>
+          <option value="">Select...</option>
+          <?php foreach ($locations as $l): ?>
+            <option value="<?php echo (int)$l['id']; ?>" <?php echo ((int)v('location_id', $asset['location_id']) === (int)$l['id']) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($l['name']); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Replace Image (optional)</label>
+        <input class="form-control" type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
+        <?php if (!empty($asset['image_path'])): ?>
+          <div class="form-text">Current: <?php echo htmlspecialchars($asset['image_path']); ?></div>
+        <?php endif; ?>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-control" rows="3" name="notes"><?php echo htmlspecialchars(v('notes', $asset['notes'])); ?></textarea>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">
+          <i class="bi bi-check2 me-1"></i> Save Changes
+        </button>
+        <a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars(url('/admin/assets/index.php')); ?>">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<?php layout_footer(); ?>
+
+
