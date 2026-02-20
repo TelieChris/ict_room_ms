@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 28, 2026 at 04:49 PM
+-- Generation Time: Feb 20, 2026 at 05:51 PM
 -- Server version: 10.1.29-MariaDB
 -- PHP Version: 7.2.0
 
@@ -86,7 +86,7 @@ INSERT INTO `assets` (`id`, `asset_code`, `asset_name`, `category_id`, `brand`, 
 (34, 'REB/MSA-GSRMR/LT031', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2120', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 14:08:17', NULL),
 (35, 'REB/MSA-GSRMR/LT030', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2156', NULL, 'Fair', 'Available', 1, NULL, 'Left-click on the touchpad does not work.', '2026-01-28 14:09:03', '2026-01-28 14:25:29'),
 (36, 'REB/MSA-GSRMR/LT035', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2205', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 14:10:06', NULL),
-(37, 'REB/MSA-GSRMR/LT044', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2146', NULL, 'Fair', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:30:21', '2026-01-28 15:08:31'),
+(37, 'REB/MSA-GSRMR/LT044', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2146', NULL, 'Fair', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:30:21', '2026-02-20 14:33:03'),
 (38, 'REB/MSA-GSRMR/LT016', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2248', NULL, 'Fair', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:33:00', '2026-01-28 14:55:48'),
 (39, 'REB/MSA-GSRMR/LT043', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2167', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 14:33:59', NULL),
 (40, 'REB/MSA-GSRMR/LT040', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2217', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 14:35:14', NULL),
@@ -97,7 +97,10 @@ INSERT INTO `assets` (`id`, `asset_code`, `asset_name`, `category_id`, `brand`, 
 (46, 'REB/MSA-GSRMR/LT103', 'POSITIVO Laptop', 2, 'POSITIVO', '14CLE-I', '156AAC06353', NULL, 'Fair', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 15:45:14', '2026-01-28 16:27:38'),
 (47, 'REB/MSA-GSRMR/PRJ002', 'Optoma Projector', 6, 'POSITIVO', 'DASSLU', 'Q7BU915AAAAAC0357', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 15:49:19', NULL),
 (48, 'REB/MSA-GSRMR/PRJ01', 'BENQ Projector', 6, 'BENQ', 'M5560', 'PD9BN04142000', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 16:05:28', NULL),
-(49, 'REB/MSA-GSRMR/LT007', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2121', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 16:53:37', NULL);
+(49, 'REB/MSA-GSRMR/LT007', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2121', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 16:53:37', NULL),
+(50, 'REB/MSA-GSRMR/LT045', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2221', NULL, 'Good', 'In Use', 1, NULL, NULL, '2026-02-20 14:27:24', '2026-02-20 14:34:01'),
+(51, 'REB/MSA-GSRMR/LT023', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2083', NULL, 'Good', 'In Use', 1, NULL, NULL, '2026-02-20 14:37:59', '2026-02-20 14:40:13'),
+(52, 'REB/MSA-GSRMR/LT100', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA8202', NULL, 'Good', 'Available', 1, NULL, 'Returned by HAHIRUMUREMYI Gilbert, it was given by NSABIMANA Fabien.', '2026-02-20 15:41:58', NULL);
 
 -- --------------------------------------------------------
 
@@ -117,6 +120,15 @@ CREATE TABLE `asset_assignments` (
   `created_by` int(10) UNSIGNED NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `asset_assignments`
+--
+
+INSERT INTO `asset_assignments` (`id`, `asset_id`, `assigned_to_type`, `assigned_to_name`, `assigned_date`, `expected_return_date`, `returned_date`, `notes`, `created_by`, `created_at`) VALUES
+(1, 37, 'Teacher', 'HAKORIMANA Theodomir', '2026-01-07', '2026-03-30', '2026-02-20', 'Facilitation in predaration and teaching', 1, '2026-02-20 14:32:52'),
+(2, 50, 'Teacher', 'HAKORIMANA Theodomir', '2026-01-07', '2026-03-30', NULL, 'Facilitation in predaration and teaching', 1, '2026-02-20 14:34:01'),
+(3, 51, 'Teacher', 'IBYIMANA Angelus', '2025-11-26', NULL, NULL, 'Using in dail accountant activity', 1, '2026-02-20 14:40:13');
 
 -- --------------------------------------------------------
 
@@ -267,7 +279,20 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity`, `entity_id`, `des
 (100, 2, 'REPORT_EXPORT', 'assets', NULL, 'Exported inventory report (Excel/CSV)', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-28 16:26:11'),
 (101, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-28 16:27:06'),
 (102, 1, 'ASSET_UPDATE', 'assets', '46', 'Updated asset REB/MSA-GSRMR/LT103', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-28 16:27:38'),
-(103, 1, 'ASSET_CREATE', 'assets', '49', 'Created asset REB/MSA-GSRMR/LT007', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-28 16:53:37');
+(103, 1, 'ASSET_CREATE', 'assets', '49', 'Created asset REB/MSA-GSRMR/LT007', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-28 16:53:37'),
+(104, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:24:43'),
+(105, 1, 'ASSET_CREATE', 'assets', '50', 'Created asset REB/MSA-GSRMR/LT045', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:27:24'),
+(106, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:28:10'),
+(107, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:28:37'),
+(108, 1, 'ASSET_UPDATE', 'assets', '50', 'Updated asset REB/MSA-GSRMR/LT045', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:32:39'),
+(109, 1, 'ASSIGN_CREATE', 'asset_assignments', '0', 'Assigned asset REB/MSA-GSRMR/LT044 to Teacher: HAKORIMANA Theodomir', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:32:52'),
+(110, 1, 'ASSIGN_RETURN', 'asset_assignments', '1', 'Returned asset REB/MSA-GSRMR/LT044', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:33:03'),
+(111, 1, 'ASSIGN_CREATE', 'asset_assignments', '0', 'Assigned asset REB/MSA-GSRMR/LT045 to Teacher: HAKORIMANA Theodomir', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:34:01'),
+(112, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:34:14'),
+(113, 1, 'ASSET_CREATE', 'assets', '51', 'Created asset REB/MSA-GSRMR/LT023', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:37:59'),
+(114, 1, 'ASSIGN_CREATE', 'asset_assignments', '0', 'Assigned asset REB/MSA-GSRMR/LT023 to Teacher: IBYIMANA Angelus', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:40:13'),
+(115, 1, 'ASSET_CREATE', 'assets', '52', 'Created asset REB/MSA-GSRMR/LT100', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 15:41:58'),
+(116, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 15:47:34');
 
 -- --------------------------------------------------------
 
@@ -361,7 +386,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `role_id`, `username`, `full_name`, `email`, `password_hash`, `is_active`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 'admin', 'TWIZEYIMANA Elie', 'twizeyimana1elia@gmail.com', '$2y$10$ncXUzMfqM8vOawGq2LEpq.75sQp2HD3KX2X0gcIZd12skJ8Fu6sAy', 1, '2026-01-28 16:27:06', '2026-01-28 06:54:42', '2026-01-28 16:27:06'),
+(1, 1, 'admin', 'TWIZEYIMANA Elie', 'twizeyimana1elia@gmail.com', '$2y$10$ncXUzMfqM8vOawGq2LEpq.75sQp2HD3KX2X0gcIZd12skJ8Fu6sAy', 1, '2026-02-20 14:24:43', '2026-01-28 06:54:42', '2026-02-20 14:24:43'),
 (2, 3, 'Peter', 'TUYIZERE Peter', NULL, '$2y$10$kIcUt9E5cWWbIh1Bnxn/R.nF6OvQXu15IV.XOxtVxtHplV6CSjCNi', 1, '2026-01-28 16:25:19', '2026-01-28 16:22:38', '2026-01-28 16:25:19');
 
 --
@@ -444,13 +469,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assets`
 --
 ALTER TABLE `assets`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `asset_assignments`
 --
 ALTER TABLE `asset_assignments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `asset_categories`
@@ -462,7 +487,7 @@ ALTER TABLE `asset_categories`
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `locations`
