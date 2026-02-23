@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $notes = trim((string)f('notes', ''));
 
   if ($asset_id <= 0) $errors[] = 'Please select an asset.';
-  if (!in_array($assigned_to_type, ['ICT Room','Teacher','Class/Department'], true)) $errors[] = 'Please select who the asset is assigned to.';
+  if (!in_array($assigned_to_type, ['ICT Room','Teacher','Class/Department','Head Teacher','DOD','DOS','Accountant'], true)) $errors[] = 'Please select who the asset is assigned to.';
   if ($assigned_to_name === '') $errors[] = 'Assigned-to name is required (e.g. ICT Room, Mr. John, S4 A, Math Dept).';
   if ($assigned_date === '') $errors[] = 'Assigned date is required.';
 
@@ -134,7 +134,7 @@ layout_header('New Assignment', 'assignments');
         <label class="form-label">Assigned To</label>
         <select class="form-select" name="assigned_to_type" required>
           <option value="">Select...</option>
-          <?php foreach (['ICT Room','Teacher','Class/Department'] as $t): ?>
+          <?php foreach (['ICT Room','Teacher','Class/Department','Head Teacher','DOD','DOS','Accountant'] as $t): ?>
             <option value="<?php echo htmlspecialchars($t); ?>" <?php echo (f('assigned_to_type', '') === $t) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($t); ?>
             </option>

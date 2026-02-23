@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 20, 2026 at 05:51 PM
+-- Generation Time: Feb 23, 2026 at 09:59 AM
 -- Server version: 10.1.29-MariaDB
 -- PHP Version: 7.2.0
 
@@ -100,7 +100,9 @@ INSERT INTO `assets` (`id`, `asset_code`, `asset_name`, `category_id`, `brand`, 
 (49, 'REB/MSA-GSRMR/LT007', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2121', NULL, 'Good', 'Available', 1, NULL, NULL, '2026-01-28 16:53:37', NULL),
 (50, 'REB/MSA-GSRMR/LT045', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2221', NULL, 'Good', 'In Use', 1, NULL, NULL, '2026-02-20 14:27:24', '2026-02-20 14:34:01'),
 (51, 'REB/MSA-GSRMR/LT023', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2083', NULL, 'Good', 'In Use', 1, NULL, NULL, '2026-02-20 14:37:59', '2026-02-20 14:40:13'),
-(52, 'REB/MSA-GSRMR/LT100', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA8202', NULL, 'Good', 'Available', 1, NULL, 'Returned by HAHIRUMUREMYI Gilbert, it was given by NSABIMANA Fabien.', '2026-02-20 15:41:58', NULL);
+(52, 'REB/MSA-GSRMR/LT100', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA8202', NULL, 'Good', 'Available', 1, NULL, 'Returned by HAHIRUMUREMYI Gilbert, it was given by NSABIMANA Fabien.', '2026-02-20 15:41:58', NULL),
+(53, 'HP 250 G6', 'HP Laptop', 2, 'HP', '3168NGW', 'CND8400468', NULL, 'Damaged', 'Maintenance', 2, NULL, NULL, '2026-02-23 08:42:16', '2026-02-23 09:07:45'),
+(54, 'REB/MSA-GSRMR/LT107', 'Lenovo laptop', 2, 'Lenovo', '-', 'REB/MSA-GSRMR/LT107', NULL, 'Damaged', 'Maintenance', 2, NULL, NULL, '2026-02-23 10:48:56', '2026-02-23 10:51:48');
 
 -- --------------------------------------------------------
 
@@ -111,7 +113,7 @@ INSERT INTO `assets` (`id`, `asset_code`, `asset_name`, `category_id`, `brand`, 
 CREATE TABLE `asset_assignments` (
   `id` int(10) UNSIGNED NOT NULL,
   `asset_id` int(10) UNSIGNED NOT NULL,
-  `assigned_to_type` enum('ICT Room','Teacher','Class/Department') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `assigned_to_type` enum('ICT Room','Teacher','Class/Department','Head Teacher','DOD','DOS','Accountant') COLLATE utf8mb4_unicode_ci NOT NULL,
   `assigned_to_name` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
   `assigned_date` date NOT NULL,
   `expected_return_date` date DEFAULT NULL,
@@ -126,9 +128,9 @@ CREATE TABLE `asset_assignments` (
 --
 
 INSERT INTO `asset_assignments` (`id`, `asset_id`, `assigned_to_type`, `assigned_to_name`, `assigned_date`, `expected_return_date`, `returned_date`, `notes`, `created_by`, `created_at`) VALUES
-(1, 37, 'Teacher', 'HAKORIMANA Theodomir', '2026-01-07', '2026-03-30', '2026-02-20', 'Facilitation in predaration and teaching', 1, '2026-02-20 14:32:52'),
 (2, 50, 'Teacher', 'HAKORIMANA Theodomir', '2026-01-07', '2026-03-30', NULL, 'Facilitation in predaration and teaching', 1, '2026-02-20 14:34:01'),
-(3, 51, 'Teacher', 'IBYIMANA Angelus', '2025-11-26', NULL, NULL, 'Using in dail accountant activity', 1, '2026-02-20 14:40:13');
+(3, 51, 'Accountant', 'IBYIMANA Angelus', '2025-11-26', NULL, NULL, 'Using in daily accountant activity', 1, '2026-02-20 14:40:13'),
+(4, 53, 'Head Teacher', 'Soeur UWIZEYIMANA Valentine', '2025-09-10', '2026-02-23', NULL, NULL, 1, '2026-02-23 08:50:46');
 
 -- --------------------------------------------------------
 
@@ -292,7 +294,20 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity`, `entity_id`, `des
 (113, 1, 'ASSET_CREATE', 'assets', '51', 'Created asset REB/MSA-GSRMR/LT023', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:37:59'),
 (114, 1, 'ASSIGN_CREATE', 'asset_assignments', '0', 'Assigned asset REB/MSA-GSRMR/LT023 to Teacher: IBYIMANA Angelus', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 14:40:13'),
 (115, 1, 'ASSET_CREATE', 'assets', '52', 'Created asset REB/MSA-GSRMR/LT100', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 15:41:58'),
-(116, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 15:47:34');
+(116, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-20 15:47:34'),
+(117, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-22 13:16:30'),
+(118, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-22 13:51:49'),
+(119, 1, 'ASSET_CREATE', 'assets', '53', 'Created asset HP 250 G6', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 08:42:16'),
+(120, 1, 'ASSIGN_CREATE', 'asset_assignments', '0', 'Assigned asset HP 250 G6 to Head Teacher: Soeur UWIZEYIMANA Valentine', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 08:50:47'),
+(121, 1, 'MAINT_CREATE', 'maintenance_logs', '0', 'Reported issue for asset HP 250 G6', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 09:07:45'),
+(122, 1, 'MAINT_UPDATE', 'maintenance_logs', '1', 'Updated maintenance status for asset REB/MSA-GSRMR/LT024 to Open', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 09:09:10'),
+(123, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 09:11:23'),
+(124, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 09:13:12'),
+(125, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 09:13:45'),
+(126, 1, 'ASSET_CREATE', 'assets', '54', 'Created asset REB/MSA-GSRMR/LT107', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 10:48:56'),
+(127, 1, 'MAINT_UPDATE', 'maintenance_logs', '2', 'Updated maintenance status for asset HP 250 G6 to Open', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 10:51:12'),
+(128, 1, 'MAINT_CREATE', 'maintenance_logs', '0', 'Reported issue for asset REB/MSA-GSRMR/LT107', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 10:51:48'),
+(129, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-02-23 10:56:18');
 
 -- --------------------------------------------------------
 
@@ -339,7 +354,9 @@ CREATE TABLE `maintenance_logs` (
 --
 
 INSERT INTO `maintenance_logs` (`id`, `asset_id`, `issue_description`, `reported_date`, `action_taken`, `technician_name`, `cost`, `status`, `created_by`, `created_at`) VALUES
-(1, 17, 'When the power button is pressed, the laptop powers on briefly but does not display any output on the screen and automatically shuts down after a few seconds. The issue persists after multiple attempts.', '2026-01-28', NULL, NULL, NULL, 'Open', 1, '2026-01-28 11:36:01');
+(1, 17, 'When the power button is pressed, the laptop powers on briefly but does not display any output on the screen and automatically shuts down after a few seconds. The issue persists after multiple attempts.', '2026-01-28', 'The laptop powers on briefly when the power button is pressed but shows no display and shuts down after a few seconds, even after multiple attempts.', NULL, NULL, 'Open', 1, '2026-01-28 11:36:01'),
+(2, 53, 'Cover of this laptop has been damaeged it require to replace it.', '2026-02-23', 'The cover of this laptop has unfortunately been damaged and needs replacement.', NULL, '80000.00', 'Open', 1, '2026-02-23 09:07:45'),
+(3, 54, 'The cover of this laptop has unfortunately been damaged and needs replacement.', '2026-02-23', NULL, NULL, NULL, 'Open', 1, '2026-02-23 10:51:48');
 
 -- --------------------------------------------------------
 
@@ -386,7 +403,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `role_id`, `username`, `full_name`, `email`, `password_hash`, `is_active`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 'admin', 'TWIZEYIMANA Elie', 'twizeyimana1elia@gmail.com', '$2y$10$ncXUzMfqM8vOawGq2LEpq.75sQp2HD3KX2X0gcIZd12skJ8Fu6sAy', 1, '2026-02-20 14:24:43', '2026-01-28 06:54:42', '2026-02-20 14:24:43'),
+(1, 1, 'admin', 'TWIZEYIMANA Elie', 'twizeyimana1elia@gmail.com', '$2y$10$ncXUzMfqM8vOawGq2LEpq.75sQp2HD3KX2X0gcIZd12skJ8Fu6sAy', 1, '2026-02-22 13:16:30', '2026-01-28 06:54:42', '2026-02-22 13:16:30'),
 (2, 3, 'Peter', 'TUYIZERE Peter', NULL, '$2y$10$kIcUt9E5cWWbIh1Bnxn/R.nF6OvQXu15IV.XOxtVxtHplV6CSjCNi', 1, '2026-01-28 16:25:19', '2026-01-28 16:22:38', '2026-01-28 16:25:19');
 
 --
@@ -469,13 +486,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assets`
 --
 ALTER TABLE `assets`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `asset_assignments`
 --
 ALTER TABLE `asset_assignments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `asset_categories`
@@ -487,7 +504,7 @@ ALTER TABLE `asset_categories`
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -499,7 +516,7 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT for table `maintenance_logs`
 --
 ALTER TABLE `maintenance_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `roles`
