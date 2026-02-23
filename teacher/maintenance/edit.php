@@ -12,14 +12,16 @@ require_role(['admin','teacher']);
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
+$sid = (int)$_SESSION['user']['school_id'];
+
 $stmt = $pdo->prepare("
   SELECT ml.*, a.asset_code, a.asset_name
   FROM maintenance_logs ml
   JOIN assets a ON a.id = ml.asset_id
-  WHERE ml.id = :id
+  WHERE ml.id = :id AND ml.school_id = :sid
   LIMIT 1
 ");
-$stmt->execute([':id' => $id]);
+$stmt->execute([':id' => $id, ':sid' => $sid]);
 $row = $stmt->fetch();
 if (!$row) {
   header('Location: ' . url('/teacher/maintenance/index.php'));
@@ -59,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $stmt = $pdo->prepare("
         UPDATE maintenance_logs
         SET status=:status, action_taken=:action_taken, technician_name=:technician_name, cost=:cost
-        WHERE id=:id
+        WHERE id=:id AND school_id=:sid
       ");
       $stmt->execute([
         ':status' => $status,
@@ -67,13 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':technician_name' => $technician_name ?: null,
         ':cost' => $costVal,
         ':id' => $id,
+        ':sid' => $sid
       ]);
 
       // Link status to asset status
       if ($status === 'Resolved') {
-        $pdo->prepare("UPDATE assets SET status='Available' WHERE id=:id")->execute([':id' => (int)$row['asset_id']]);
+        $pdo->prepare("UPDATE assets SET status='Available' WHERE id=:id AND school_id=:sid")->execute([':id' => (int)$row['asset_id'], ':sid' => $sid]);
       } else {
-        $pdo->prepare("UPDATE assets SET status='Maintenance' WHERE id=:id")->execute([':id' => (int)$row['asset_id']]);
+        $pdo->prepare("UPDATE assets SET status='Maintenance' WHERE id=:id AND school_id=:sid")->execute([':id' => (int)$row['asset_id'], ':sid' => $sid]);
       }
 
       $pdo->commit();

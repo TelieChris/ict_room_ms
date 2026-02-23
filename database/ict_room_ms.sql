@@ -38,6 +38,8 @@ CREATE TABLE `assets` (
   `serial_number` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `purchase_date` date DEFAULT NULL,
   `asset_condition` enum('New','Good','Fair','Damaged') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Good',
+  `power_adapter` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
+  `power_adapter_status` enum('Working','Damaged','Missing','N/A') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N/A',
   `status` enum('Available','In Use','Maintenance','Lost') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Available',
   `location_id` int(10) UNSIGNED NOT NULL,
   `image_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -118,6 +120,8 @@ CREATE TABLE `asset_assignments` (
   `assigned_date` date NOT NULL,
   `expected_return_date` date DEFAULT NULL,
   `returned_date` date DEFAULT NULL,
+  `return_adapter_status` enum('Working','Damaged','Missing','N/A') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `return_notes` text COLLATE utf8mb4_unicode_ci,
   `notes` text COLLATE utf8mb4_unicode_ci,
   `created_by` int(10) UNSIGNED NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP

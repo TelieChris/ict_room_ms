@@ -12,21 +12,28 @@ require_role(['admin','teacher']);
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
+$sid = (int)$_SESSION['user']['school_id'];
+
 $stmt = $pdo->prepare("
   SELECT *
   FROM assets
-  WHERE id = :id
+  WHERE id = :id AND school_id = :sid
   LIMIT 1
 ");
-$stmt->execute([':id' => $id]);
+$stmt->execute([':id' => $id, ':sid' => $sid]);
 $asset = $stmt->fetch();
 if (!$asset) {
   http_response_code(404);
   die('Asset not found.');
 }
 
-$categories = $pdo->query("SELECT id, name FROM asset_categories ORDER BY name")->fetchAll();
-$locations = $pdo->query("SELECT id, name FROM locations ORDER BY name")->fetchAll();
+$stmt_cat = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id = ? ORDER BY name");
+$stmt_cat->execute([$sid]);
+$categories = $stmt_cat->fetchAll();
+
+$stmt_loc = $pdo->prepare("SELECT id, name FROM locations WHERE school_id = ? ORDER BY name");
+$stmt_loc->execute([$sid]);
+$locations = $stmt_loc->fetchAll();
 
 $errors = [];
 
@@ -44,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $serial_number = trim((string)v('serial_number', $asset['serial_number']));
   $purchase_date = trim((string)v('purchase_date', $asset['purchase_date']));
   $asset_condition = (string)v('asset_condition', $asset['asset_condition']);
+  $power_adapter = (string)v('power_adapter', $asset['power_adapter']);
+  $power_adapter_status = (string)v('power_adapter_status', $asset['power_adapter_status']);
   $status = (string)v('status', $asset['status']);
   $location_id = (int)v('location_id', $asset['location_id']);
   $notes = trim((string)v('notes', $asset['notes']));
@@ -90,6 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           serial_number=:serial_number,
           purchase_date=:purchase_date,
           asset_condition=:asset_condition,
+          power_adapter=:power_adapter,
+          power_adapter_status=:power_adapter_status,
           status=:status,
           location_id=:location_id,
           image_path=:image_path,
@@ -105,6 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':serial_number' => $serial_number ?: null,
         ':purchase_date' => $purchase_date ?: null,
         ':asset_condition' => $asset_condition,
+        ':power_adapter' => $power_adapter,
+        ':power_adapter_status' => $power_adapter_status,
         ':status' => $status,
         ':location_id' => $location_id,
         ':image_path' => $image_path ?: null,
@@ -186,6 +199,23 @@ layout_header('Edit Asset', 'assets');
           <?php foreach (['New','Good','Fair','Damaged'] as $cnd): ?>
             <option value="<?php echo htmlspecialchars($cnd); ?>" <?php echo (v('asset_condition', $asset['asset_condition']) === $cnd) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($cnd); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Power Adapter?</label>
+        <select class="form-select" name="power_adapter">
+          <option value="No" <?php echo (v('power_adapter', $asset['power_adapter']) === 'No') ? 'selected' : ''; ?>>No</option>
+          <option value="Yes" <?php echo (v('power_adapter', $asset['power_adapter']) === 'Yes') ? 'selected' : ''; ?>>Yes</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Adapter Status</label>
+        <select class="form-select" name="power_adapter_status">
+          <?php foreach (['N/A','Working','Damaged','Missing'] as $pas): ?>
+            <option value="<?php echo htmlspecialchars($pas); ?>" <?php echo (v('power_adapter_status', $asset['power_adapter_status']) === $pas) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($pas); ?>
             </option>
           <?php endforeach; ?>
         </select>

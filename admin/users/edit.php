@@ -14,13 +14,15 @@ require_role(['admin']);
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
+$sid = (int)$_SESSION['user']['school_id'];
+
 $stmt = $pdo->prepare("
   SELECT u.id, u.role_id, u.username, u.full_name, u.email, u.is_active
   FROM users u
-  WHERE u.id = :id
+  WHERE u.id = :id AND u.school_id = :sid
   LIMIT 1
 ");
-$stmt->execute([':id' => $id]);
+$stmt->execute([':id' => $id, ':sid' => $sid]);
 $userRow = $stmt->fetch();
 if (!$userRow) {
   flash_set('error', 'User not found.');
@@ -63,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $stmt = $pdo->prepare("
         UPDATE users
         SET role_id=:role_id, username=:username, full_name=:full_name, email=:email, is_active=:active
-        WHERE id=:id
+        WHERE id=:id AND school_id=:sid
       ");
       $stmt->execute([
         ':role_id' => $role_id,
@@ -72,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':email' => ($email !== '') ? $email : null,
         ':active' => $is_active,
         ':id' => $id,
+        ':sid' => $sid,
       ]);
 
       audit_log('USER_UPDATE', 'users', $id, "Updated user {$username}");

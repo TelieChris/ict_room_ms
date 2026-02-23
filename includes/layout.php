@@ -22,6 +22,7 @@ function layout_header(string $title, string $active = ''): void
     ['label' => 'Reports', 'icon' => 'bi-file-earmark-text', 'href' => url('/reports/index.php'), 'key' => 'reports', 'roles' => ['admin','teacher','viewer']],
     ['label' => 'Audit Log', 'icon' => 'bi-journal-check', 'href' => url('/admin/audit/index.php'), 'key' => 'audit', 'roles' => ['admin']],
     ['label' => 'Users', 'icon' => 'bi-people', 'href' => url('/admin/users/index.php'), 'key' => 'users', 'roles' => ['admin']],
+    ['label' => 'Schools', 'icon' => 'bi-building', 'href' => url('/admin/schools/index.php'), 'key' => 'schools', 'roles' => ['admin']],
   ];
 
   ?>
@@ -49,7 +50,7 @@ function layout_header(string $title, string $active = ''): void
           </div>
           <div>
             <div class="brand"><?php echo htmlspecialchars($appTitle); ?></div>
-            <div class="small text-white-50">GS Remera TSS</div>
+            <div class="small text-white-50"><?php echo htmlspecialchars($user['school_name'] ?? 'System'); ?></div>
           </div>
         </div>
 

@@ -44,11 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     try {
       $hash = password_hash($password, PASSWORD_DEFAULT);
+      $sid = (int)$_SESSION['user']['school_id'];
       $stmt = $pdo->prepare("
-        INSERT INTO users (role_id, username, full_name, email, password_hash, is_active)
-        VALUES (:role_id, :username, :full_name, :email, :hash, :active)
+        INSERT INTO users (school_id, role_id, username, full_name, email, password_hash, is_active)
+        VALUES (:school_id, :role_id, :username, :full_name, :email, :hash, :active)
       ");
       $stmt->execute([
+        ':school_id' => $sid,
         ':role_id' => $role_id,
         ':username' => $username,
         ':full_name' => $full_name,

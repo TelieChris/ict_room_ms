@@ -11,18 +11,19 @@ require_role(['admin']); // delete is admin-only
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
-if ($id > 0) {
+  $sid = (int)$_SESSION['user']['school_id'];
   $code = null;
   try {
-    $stmt = $pdo->prepare("SELECT asset_code FROM assets WHERE id=:id");
-    $stmt->execute([':id' => $id]);
+    $stmt = $pdo->prepare("SELECT asset_code FROM assets WHERE id=:id AND school_id=:sid");
+    $stmt->execute([':id' => $id, ':sid' => $sid]);
     $code = $stmt->fetchColumn() ?: null;
   } catch (Throwable $e) {}
 
-  $stmt = $pdo->prepare("DELETE FROM assets WHERE id = :id");
-  $stmt->execute([':id' => $id]);
-  audit_log('ASSET_DELETE', 'assets', $id, $code ? "Deleted asset {$code}" : "Deleted asset #{$id}");
-}
+  if ($code) {
+    $stmt = $pdo->prepare("DELETE FROM assets WHERE id = :id AND school_id = :sid");
+    $stmt->execute([':id' => $id, ':sid' => $sid]);
+    audit_log('ASSET_DELETE', 'assets', $id, "Deleted asset {$code}");
+  }
 
 header('Location: ' . url('/admin/assets/index.php'));
 exit;

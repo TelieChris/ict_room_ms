@@ -10,8 +10,15 @@ require_login();
 require_role(['admin','teacher']); // viewers cannot create
 
 $pdo = db();
-$categories = $pdo->query("SELECT id, name FROM asset_categories ORDER BY name")->fetchAll();
-$locations = $pdo->query("SELECT id, name FROM locations ORDER BY name")->fetchAll();
+$sid = (int)$_SESSION['user']['school_id'];
+
+$stmt_cat = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id = ? ORDER BY name");
+$stmt_cat->execute([$sid]);
+$categories = $stmt_cat->fetchAll();
+
+$stmt_loc = $pdo->prepare("SELECT id, name FROM locations WHERE school_id = ? ORDER BY name");
+$stmt_loc->execute([$sid]);
+$locations = $stmt_loc->fetchAll();
 
 $errors = [];
 
@@ -29,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $serial_number = trim((string)field('serial_number'));
   $purchase_date = trim((string)field('purchase_date'));
   $asset_condition = (string)field('asset_condition', 'Good');
+  $power_adapter = (string)field('power_adapter', 'No');
+  $power_adapter_status = (string)field('power_adapter_status', 'N/A');
   $status = (string)field('status', 'Available');
   $location_id = (int)field('location_id', 0);
   $notes = trim((string)field('notes'));
@@ -66,12 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     $stmt = $pdo->prepare("
       INSERT INTO assets
-      (asset_code, asset_name, category_id, brand, model, serial_number, purchase_date, asset_condition, status, location_id, image_path, notes)
+      (school_id, asset_code, asset_name, category_id, brand, model, serial_number, purchase_date, asset_condition, power_adapter, power_adapter_status, status, location_id, image_path, notes)
       VALUES
-      (:asset_code, :asset_name, :category_id, :brand, :model, :serial_number, :purchase_date, :asset_condition, :status, :location_id, :image_path, :notes)
+      (:school_id, :asset_code, :asset_name, :category_id, :brand, :model, :serial_number, :purchase_date, :asset_condition, :power_adapter, :power_adapter_status, :status, :location_id, :image_path, :notes)
     ");
     try {
       $stmt->execute([
+        ':school_id' => $sid,
         ':asset_code' => $asset_code,
         ':asset_name' => $asset_name,
         ':category_id' => $category_id,
@@ -80,6 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':serial_number' => $serial_number ?: null,
         ':purchase_date' => $purchase_date ?: null,
         ':asset_condition' => $asset_condition,
+        ':power_adapter' => $power_adapter,
+        ':power_adapter_status' => $power_adapter_status,
         ':status' => $status,
         ':location_id' => $location_id,
         ':image_path' => $image_path,
@@ -160,6 +172,23 @@ layout_header('Add Asset', 'assets');
           <?php foreach (['New','Good','Fair','Damaged'] as $cnd): ?>
             <option value="<?php echo htmlspecialchars($cnd); ?>" <?php echo (field('asset_condition','Good') === $cnd) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($cnd); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Power Adapter?</label>
+        <select class="form-select" name="power_adapter">
+          <option value="No" <?php echo (field('power_adapter','No') === 'No') ? 'selected' : ''; ?>>No</option>
+          <option value="Yes" <?php echo (field('power_adapter','No') === 'Yes') ? 'selected' : ''; ?>>Yes</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Adapter Status</label>
+        <select class="form-select" name="power_adapter_status">
+          <?php foreach (['N/A','Working','Damaged','Missing'] as $pas): ?>
+            <option value="<?php echo htmlspecialchars($pas); ?>" <?php echo (field('power_adapter_status','N/A') === $pas) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($pas); ?>
             </option>
           <?php endforeach; ?>
         </select>

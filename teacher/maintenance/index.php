@@ -12,16 +12,18 @@ $pdo = db();
 
 $statusFilter = trim($_GET['status'] ?? 'open'); // open|inprogress|resolved|all
 
-$where = '';
+$sid = (int)$_SESSION['user']['school_id'];
+$whereClauses = ["ml.school_id = :sid"];
 if ($statusFilter === 'open') {
-  $where = "WHERE ml.status = 'Open'";
+  $whereClauses[] = "ml.status = 'Open'";
 } elseif ($statusFilter === 'inprogress') {
-  $where = "WHERE ml.status = 'In Progress'";
+  $whereClauses[] = "ml.status = 'In Progress'";
 } elseif ($statusFilter === 'resolved') {
-  $where = "WHERE ml.status = 'Resolved'";
+  $whereClauses[] = "ml.status = 'Resolved'";
 }
+$where = "WHERE " . implode(" AND ", $whereClauses);
 
-$stmt = $pdo->query("
+$stmt = $pdo->prepare("
   SELECT
     ml.*,
     a.asset_code, a.asset_name, a.status AS asset_status,
@@ -35,6 +37,7 @@ $stmt = $pdo->query("
   ORDER BY ml.id DESC
   LIMIT 200
 ");
+$stmt->execute([':sid' => $sid]);
 $rows = $stmt->fetchAll();
 
 layout_header('Maintenance', 'maintenance');

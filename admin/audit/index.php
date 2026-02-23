@@ -9,13 +9,18 @@ require_role(['admin']);
 
 $pdo = db();
 
-$logs = $pdo->query("
+$sid = (int)$_SESSION['user']['school_id'];
+
+$stmt = $pdo->prepare("
   SELECT a.*, u.username, u.full_name
   FROM audit_logs a
   LEFT JOIN users u ON u.id = a.user_id
+  WHERE a.school_id = :sid
   ORDER BY a.id DESC
   LIMIT 200
-")->fetchAll();
+");
+$stmt->execute([':sid' => $sid]);
+$logs = $stmt->fetchAll();
 
 layout_header('Audit Log', 'audit');
 ?>

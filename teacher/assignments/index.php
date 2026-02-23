@@ -12,11 +12,14 @@ $pdo = db();
 
 $filter = trim($_GET['filter'] ?? 'open'); // open | all | returned
 
-$where = '';
-if ($filter === 'open') $where = "WHERE aa.returned_date IS NULL";
-elseif ($filter === 'returned') $where = "WHERE aa.returned_date IS NOT NULL";
+$sid = (int)$_SESSION['user']['school_id'];
+$whereClauses = ["aa.school_id = :sid"];
+if ($filter === 'open') $whereClauses[] = "aa.returned_date IS NULL";
+elseif ($filter === 'returned') $whereClauses[] = "aa.returned_date IS NOT NULL";
 
-$stmt = $pdo->query("
+$where = "WHERE " . implode(" AND ", $whereClauses);
+
+$stmt = $pdo->prepare("
   SELECT
     aa.*,
     a.asset_code, a.asset_name, a.status AS asset_status,
@@ -30,6 +33,7 @@ $stmt = $pdo->query("
   ORDER BY aa.id DESC
   LIMIT 200
 ");
+$stmt->execute([':sid' => $sid]);
 $rows = $stmt->fetchAll();
 
 layout_header('Assignments', 'assignments');
@@ -103,7 +107,7 @@ layout_header('Assignments', 'assignments');
                 <?php if (empty($r['returned_date'])): ?>
                   <a class="btn btn-sm btn-success"
                      href="<?php echo htmlspecialchars(url('/teacher/assignments/return.php')); ?>?id=<?php echo (int)$r['id']; ?>"
-                     data-confirm="Mark this asset as returned?">
+                     title="Return Asset">
                     <i class="bi bi-check2-circle"></i>
                   </a>
                 <?php endif; ?>

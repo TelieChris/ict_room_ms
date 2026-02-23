@@ -14,8 +14,10 @@ require_role(['admin']);
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
-$stmt = $pdo->prepare("SELECT id, username, full_name FROM users WHERE id=:id LIMIT 1");
-$stmt->execute([':id' => $id]);
+$sid = (int)$_SESSION['user']['school_id'];
+
+$stmt = $pdo->prepare("SELECT id, username, full_name FROM users WHERE id=:id AND school_id=:sid LIMIT 1");
+$stmt->execute([':id' => $id, ':sid' => $sid]);
 $u = $stmt->fetch();
 if (!$u) {
   flash_set('error', 'User not found.');
@@ -37,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     try {
       $hash = password_hash($p1, PASSWORD_DEFAULT);
-      $stmt = $pdo->prepare("UPDATE users SET password_hash=:h WHERE id=:id");
-      $stmt->execute([':h' => $hash, ':id' => (int)$u['id']]);
+      $stmt = $pdo->prepare("UPDATE users SET password_hash=:h WHERE id=:id AND school_id=:sid");
+      $stmt->execute([':h' => $hash, ':id' => (int)$u['id'], ':sid' => $sid]);
 
       audit_log('USER_PASSWORD_RESET', 'users', (int)$u['id'], "Reset password for {$u['username']}");
       flash_set('success', 'Password reset successfully.');

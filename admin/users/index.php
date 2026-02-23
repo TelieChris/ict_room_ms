@@ -12,13 +12,18 @@ require_role(['admin']);
 
 $pdo = db();
 
-$users = $pdo->query("
+$sid = (int)$_SESSION['user']['school_id'];
+
+$stmt = $pdo->prepare("
   SELECT u.id, u.username, u.full_name, u.email, u.is_active, u.last_login_at, u.created_at, r.name AS role
   FROM users u
   JOIN roles r ON r.id = u.role_id
+  WHERE u.school_id = :sid
   ORDER BY u.id DESC
   LIMIT 200
-")->fetchAll();
+");
+$stmt->execute([':sid' => $sid]);
+$users = $stmt->fetchAll();
 
 layout_header('Users', 'users');
 $me = auth_user();

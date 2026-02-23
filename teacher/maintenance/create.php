@@ -11,13 +11,18 @@ require_role(['admin','teacher']);
 
 $pdo = db();
 
-// Assets that can be reported (any status)
-$assets = $pdo->query("
+$sid = (int)$_SESSION['user']['school_id'];
+
+// Assets that can be reported (any status) - Scoped to school
+$stmt_assets = $pdo->prepare("
   SELECT id, asset_code, asset_name, status
   FROM assets
+  WHERE school_id = ?
   ORDER BY asset_name, asset_code
   LIMIT 500
-")->fetchAll();
+");
+$stmt_assets->execute([$sid]);
+$assets = $stmt_assets->fetchAll();
 
 $errors = [];
 
@@ -55,11 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       $stmt = $pdo->prepare("
         INSERT INTO maintenance_logs
-          (asset_id, issue_description, reported_date, action_taken, technician_name, cost, status, created_by)
+          (school_id, asset_id, issue_description, reported_date, action_taken, technician_name, cost, status, created_by)
         VALUES
-          (:asset_id, :issue_description, :reported_date, NULL, :technician_name, :cost, 'Open', :created_by)
+          (:school_id, :asset_id, :issue_description, :reported_date, NULL, :technician_name, :cost, 'Open', :created_by)
       ");
       $stmt->execute([
+        ':school_id' => $sid,
         ':asset_id' => $asset_id,
         ':issue_description' => $issue_description,
         ':reported_date' => $reported_date,
@@ -69,14 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       ]);
 
       // Set asset status to Maintenance
-      $pdo->prepare("UPDATE assets SET status='Maintenance' WHERE id=:id")->execute([':id' => $asset_id]);
+      $pdo->prepare("UPDATE assets SET status='Maintenance' WHERE id=:id AND school_id=:sid")->execute([':id' => $asset_id, ':sid' => $sid]);
 
       $logId = (int)$pdo->lastInsertId();
       $pdo->commit();
 
       // For audit description, fetch asset code
-      $codeStmt = $pdo->prepare("SELECT asset_code FROM assets WHERE id=:id");
-      $codeStmt->execute([':id' => $asset_id]);
+      $codeStmt = $pdo->prepare("SELECT asset_code FROM assets WHERE id=:id AND school_id=:sid");
+      $codeStmt->execute([':id' => $asset_id, ':sid' => $sid]);
       $code = $codeStmt->fetchColumn() ?: ('#' . $asset_id);
 
       audit_log('MAINT_CREATE', 'maintenance_logs', $logId, "Reported issue for asset {$code}");

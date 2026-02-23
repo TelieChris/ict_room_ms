@@ -11,14 +11,18 @@ require_role(['admin','teacher']);
 
 $pdo = db();
 
-// Only allow assigning assets that are currently Available
-$assets = $pdo->query("
+$sid = (int)$_SESSION['user']['school_id'];
+
+// Only allow assigning assets that are currently Available in the current school
+$stmt_assets = $pdo->prepare("
   SELECT id, asset_code, asset_name
   FROM assets
-  WHERE status = 'Available'
+  WHERE status = 'Available' AND school_id = ?
   ORDER BY asset_name, asset_code
   LIMIT 500
-")->fetchAll();
+");
+$stmt_assets->execute([$sid]);
+$assets = $stmt_assets->fetchAll();
 
 $errors = [];
 
@@ -42,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Ensure asset is still available at time of submit (race-safe)
   if (!$errors) {
-    $stmt = $pdo->prepare("SELECT status, asset_code FROM assets WHERE id=:id LIMIT 1");
-    $stmt->execute([':id' => $asset_id]);
+    $stmt = $pdo->prepare("SELECT status, asset_code FROM assets WHERE id=:id AND school_id=:sid LIMIT 1");
+    $stmt->execute([':id' => $asset_id, ':sid' => $sid]);
     $asset = $stmt->fetch();
     if (!$asset) {
       $errors[] = 'Selected asset not found.';
@@ -61,11 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       $stmt = $pdo->prepare("
         INSERT INTO asset_assignments
-          (asset_id, assigned_to_type, assigned_to_name, assigned_date, expected_return_date, returned_date, notes, created_by)
+          (school_id, asset_id, assigned_to_type, assigned_to_name, assigned_date, expected_return_date, returned_date, notes, created_by)
         VALUES
-          (:asset_id, :type, :name, :assigned_date, :expected_return_date, NULL, :notes, :created_by)
+          (:school_id, :asset_id, :type, :name, :assigned_date, :expected_return_date, NULL, :notes, :created_by)
       ");
       $stmt->execute([
+        ':school_id' => $sid,
         ':asset_id' => $asset_id,
         ':type' => $assigned_to_type,
         ':name' => $assigned_to_name,
@@ -76,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       ]);
 
       // Auto status update
-      $pdo->prepare("UPDATE assets SET status='In Use' WHERE id=:id")->execute([':id' => $asset_id]);
+      $pdo->prepare("UPDATE assets SET status='In Use' WHERE id=:id AND school_id=:sid")->execute([':id' => $asset_id, ':sid' => $sid]);
 
       $assignmentId = (int)$pdo->lastInsertId();
       $pdo->commit();

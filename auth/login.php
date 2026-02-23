@@ -23,9 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } else {
     $pdo = db();
     $stmt = $pdo->prepare("
-      SELECT u.id, u.username, u.full_name, u.password_hash, u.is_active, r.name AS role
+      SELECT u.id, u.username, u.full_name, u.password_hash, u.is_active, u.school_id, r.name AS role, s.name AS school_name
       FROM users u
       JOIN roles r ON r.id = u.role_id
+      JOIN schools s ON s.id = u.school_id
       WHERE u.username = :username
       LIMIT 1
     ");
@@ -41,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'username' => $user['username'],
         'full_name' => $user['full_name'],
         'role' => $user['role'],
+        'school_id' => (int)$user['school_id'],
+        'school_name' => $user['school_name'],
       ];
 
       $pdo->prepare("UPDATE users SET last_login_at = NOW() WHERE id = :id")->execute([':id' => (int)$user['id']]);
@@ -72,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <i class="bi bi-shield-lock fs-2"></i>
           </div>
           <h1 class="h4 mb-1">ICT Room Asset Management</h1>
-          <div class="text-secondary">GS Remera TSS</div>
+          <div class="text-secondary">Multi-School Edition</div>
         </div>
 
         <div class="card table-card">

@@ -13,8 +13,9 @@ $status = trim($_GET['status'] ?? '');
 $location = (int)($_GET['location'] ?? 0);
 $q = trim($_GET['q'] ?? '');
 
-$where = [];
-$params = [];
+$sid = (int)$_SESSION['user']['school_id'];
+$where = ["a.school_id = :sid"];
+$params = [':sid' => $sid];
 
 if ($category > 0) { $where[] = "a.category_id = :category"; $params[':category'] = $category; }
 if ($location > 0) { $where[] = "a.location_id = :location"; $params[':location'] = $location; }

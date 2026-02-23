@@ -9,14 +9,16 @@ function audit_log(string $action, ?string $entity = null, $entityId = null, ?st
     $pdo = db();
     $user = auth_user();
     $userId = $user ? (int)$user['id'] : null;
+    $schoolId = $user ? (int)$user['school_id'] : null;
     $ip = $_SERVER['REMOTE_ADDR'] ?? null;
     $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
 
     $stmt = $pdo->prepare("
-      INSERT INTO audit_logs (user_id, action, entity, entity_id, description, ip_address, user_agent)
-      VALUES (:user_id, :action, :entity, :entity_id, :description, :ip, :ua)
+      INSERT INTO audit_logs (school_id, user_id, action, entity, entity_id, description, ip_address, user_agent)
+      VALUES (:school_id, :user_id, :action, :entity, :entity_id, :description, :ip, :ua)
     ");
     $stmt->execute([
+      ':school_id' => $schoolId,
       ':user_id' => $userId,
       ':action' => $action,
       ':entity' => $entity,

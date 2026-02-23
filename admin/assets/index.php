@@ -13,8 +13,9 @@ $q = trim($_GET['q'] ?? '');
 $status = trim($_GET['status'] ?? '');
 $category = (int)($_GET['category'] ?? 0);
 
-$where = [];
-$params = [];
+$sid = (int)$_SESSION['user']['school_id'];
+$where = ["a.school_id = :sid"];
+$params = [':sid' => $sid];
 
 if ($q !== '') {
   // MySQL PDO with emulated prepares disabled cannot reuse the same named placeholder multiple times.
@@ -45,7 +46,9 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $assets = $stmt->fetchAll();
 
-$categories = $pdo->query("SELECT id, name FROM asset_categories ORDER BY name")->fetchAll();
+$categories = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id = ? ORDER BY name");
+$categories->execute([$sid]);
+$categories = $categories->fetchAll();
 
 layout_header('Assets', 'assets');
 ?>
@@ -107,6 +110,7 @@ layout_header('Assets', 'assets');
             <th>Code</th>
             <th>Asset</th>
             <th>Category</th>
+            <th>Power Adapter</th>
             <th>Status</th>
             <th>Location</th>
             <th class="text-end">Actions</th>
@@ -129,6 +133,17 @@ layout_header('Assets', 'assets');
                 </div>
               </td>
               <td><?php echo htmlspecialchars($a['category_name']); ?></td>
+              <td>
+                <?php if ($a['power_adapter'] === 'Yes'): ?>
+                  <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                    <i class="bi bi-plug"></i> Yes (<?php echo htmlspecialchars($a['power_adapter_status']); ?>)
+                  </span>
+                <?php else: ?>
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                    No
+                  </span>
+                <?php endif; ?>
+              </td>
               <td>
                 <?php
                   $badge = 'secondary';

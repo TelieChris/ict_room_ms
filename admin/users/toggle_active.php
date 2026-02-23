@@ -39,9 +39,11 @@ if ($id === $myId) {
   exit;
 }
 
+$sid = (int)$_SESSION['user']['school_id'];
+
 try {
-  $stmt = $pdo->prepare("SELECT username, is_active FROM users WHERE id=:id LIMIT 1");
-  $stmt->execute([':id' => $id]);
+  $stmt = $pdo->prepare("SELECT username, is_active FROM users WHERE id=:id AND school_id=:sid LIMIT 1");
+  $stmt->execute([':id' => $id, ':sid' => $sid]);
   $u = $stmt->fetch();
   if (!$u) {
     flash_set('error', 'User not found.');
@@ -49,8 +51,8 @@ try {
     exit;
   }
 
-  $stmt = $pdo->prepare("UPDATE users SET is_active=:a WHERE id=:id");
-  $stmt->execute([':a' => $to, ':id' => $id]);
+  $stmt = $pdo->prepare("UPDATE users SET is_active=:a WHERE id=:id AND school_id=:sid");
+  $stmt->execute([':a' => $to, ':id' => $id, ':sid' => $sid]);
 
   $label = ($to === 1) ? 'Activated' : 'Disabled';
   audit_log('USER_STATUS', 'users', $id, "{$label} user {$u['username']}");
