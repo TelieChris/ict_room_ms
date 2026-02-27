@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -9,10 +9,17 @@ require_once __DIR__ . '/../../includes/flash.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin']);
+require_role(['super_admin']);
 
 $pdo = db();
 $roles = $pdo->query("SELECT id, name FROM roles ORDER BY name")->fetchAll();
+$isSuper = is_super_admin();
+$schools = $isSuper ? $pdo->query("SELECT id, name FROM schools ORDER BY name")->fetchAll() : [];
+
+$sid = (int)($_SESSION['user']['school_id'] ?? 0);
+$locations = $pdo->prepare("SELECT id, name FROM locations WHERE school_id = ? ORDER BY name");
+$locations->execute([$sid]);
+$locations = $locations->fetchAll();
 
 $errors = [];
 
@@ -33,8 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $password = (string)uv('password', '');
   $password2 = (string)uv('password2', '');
   $is_active = (int)uv('is_active', 1) === 1 ? 1 : 0;
+  $form_school_id = (int)uv('school_id', 0);
+  $location_id = (int)uv('location_id', 0);
 
   if ($role_id <= 0) $errors[] = 'Role is required.';
+  if ($isSuper && $form_school_id <= 0) $errors[] = 'School is required.';
   if ($username === '') $errors[] = 'Username is required.';
   if ($full_name === '') $errors[] = 'Full name is required.';
   if ($password === '') $errors[] = 'Password is required.';
@@ -44,14 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     try {
       $hash = password_hash($password, PASSWORD_DEFAULT);
-      $sid = (int)$_SESSION['user']['school_id'];
+      $sid = $isSuper ? $form_school_id : (int)$_SESSION['user']['school_id'];
       $stmt = $pdo->prepare("
-        INSERT INTO users (school_id, role_id, username, full_name, email, password_hash, is_active)
-        VALUES (:school_id, :role_id, :username, :full_name, :email, :hash, :active)
+        INSERT INTO users (school_id, role_id, location_id, username, full_name, email, password_hash, is_active)
+        VALUES (:school_id, :role_id, :location_id, :username, :full_name, :email, :hash, :active)
       ");
       $stmt->execute([
         ':school_id' => $sid,
         ':role_id' => $role_id,
+        ':location_id' => ($location_id > 0) ? $location_id : null,
         ':username' => $username,
         ':full_name' => $full_name,
         ':email' => ($email !== '') ? $email : null,
@@ -109,7 +120,21 @@ layout_header('Add User', 'users');
         </select>
       </div>
 
-      <div class="col-12 col-md-4">
+      <?php if ($isSuper): ?>
+        <div class="col-12 col-md-4">
+          <label class="form-label">School</label>
+          <select class="form-select" name="school_id" required>
+            <option value="">Select...</option>
+            <?php foreach ($schools as $sch): ?>
+              <option value="<?php echo (int)$sch['id']; ?>" <?php echo ((int)uv('school_id', 0) === (int)$sch['id']) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($sch['name']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      <?php endif; ?>
+
+      <div class="col-12 col-md-<?php echo $isSuper ? '4' : '8'; ?>">
         <label class="form-label">Username</label>
         <input class="form-control" name="username" required value="<?php echo htmlspecialchars(uv('username', '')); ?>">
       </div>
@@ -119,6 +144,18 @@ layout_header('Add User', 'users');
         <select class="form-select" name="is_active">
           <option value="1" <?php echo ((int)uv('is_active', 1) === 1) ? 'selected' : ''; ?>>Active</option>
           <option value="0" <?php echo ((int)uv('is_active', 1) === 0) ? 'selected' : ''; ?>>Disabled</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label">Assigned ICT Lab (Optional)</label>
+        <select class="form-select" name="location_id">
+          <option value="0">Not specific / All Labs Access</option>
+          <?php foreach ($locations as $l): ?>
+            <option value="<?php echo (int)$l['id']; ?>" <?php echo ((int)uv('location_id', 0) === (int)$l['id']) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($l['name']); ?>
+            </option>
+          <?php endforeach; ?>
         </select>
       </div>
 

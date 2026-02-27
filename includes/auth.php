@@ -38,4 +38,26 @@ function require_role(array $allowedRoles): void
   }
 }
 
+function is_super_admin(): bool
+{
+  $user = auth_user();
+  return ($user['role'] ?? '') === 'super_admin';
+}
 
+function is_it_technician(): bool
+{
+  $user = auth_user();
+  return ($user['role'] ?? '') === 'it_technician';
+}
+
+function is_head_teacher(): bool
+{
+  $user = auth_user();
+  return ($user['role'] ?? '') === 'head_teacher';
+}
+
+function is_teacher(): bool
+{
+  $user = auth_user();
+  return ($user['role'] ?? '') === 'teacher';
+}

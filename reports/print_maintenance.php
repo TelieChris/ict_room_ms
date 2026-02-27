@@ -13,8 +13,14 @@ $logStatus = trim($_GET['status'] ?? '');
 $q = trim($_GET['q'] ?? '');
 
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $where = ["m.school_id = :sid"];
 $params = [':sid' => $sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
 
 if ($logStatus !== '') { $where[] = "m.status = :mstatus"; $params[':mstatus'] = $logStatus; }
 if ($q !== '') { $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR m.issue_description LIKE :q OR m.technician_name LIKE :q)"; $params[':q'] = '%' . $q . '%'; }
@@ -147,13 +153,8 @@ $generatedAt = date('Y-m-d H:i');
       </div>
       <div style="width: 250px;">
         <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
-        <div class="small fw-bold text-uppercase">Reviewed By</div>
-        <div class="small text-secondary mt-1">Head of ICT</div>
-      </div>
-      <div style="width: 250px;">
-        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
         <div class="small fw-bold text-uppercase">Approved By</div>
-        <div class="small text-secondary mt-1">School Manager / Principal</div>
+        <div class="small text-secondary mt-1">Head Teacher / Principal</div>
       </div>
     </div>
 

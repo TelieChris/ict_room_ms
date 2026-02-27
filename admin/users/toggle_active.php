@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/db.php';
@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/flash.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin']);
+require_role(['super_admin']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   header('Location: ' . url('/admin/users/index.php'));
@@ -39,11 +39,18 @@ if ($id === $myId) {
   exit;
 }
 
-$sid = (int)$_SESSION['user']['school_id'];
+$isSuper = is_super_admin();
+$sid_from_session = (int)$_SESSION['user']['school_id'];
 
 try {
-  $stmt = $pdo->prepare("SELECT username, is_active FROM users WHERE id=:id AND school_id=:sid LIMIT 1");
-  $stmt->execute([':id' => $id, ':sid' => $sid]);
+  $query = "SELECT username, is_active FROM users WHERE id=:id";
+  $params = [':id' => $id];
+  if (!$isSuper) {
+      $query .= " AND school_id=:sid";
+      $params[':sid'] = $sid_from_session;
+  }
+  $stmt = $pdo->prepare($query);
+  $stmt->execute($params);
   $u = $stmt->fetch();
   if (!$u) {
     flash_set('error', 'User not found.');
@@ -51,8 +58,14 @@ try {
     exit;
   }
 
-  $stmt = $pdo->prepare("UPDATE users SET is_active=:a WHERE id=:id AND school_id=:sid");
-  $stmt->execute([':a' => $to, ':id' => $id, ':sid' => $sid]);
+  $update_query = "UPDATE users SET is_active=:a WHERE id=:id";
+  $update_params = [':a' => $to, ':id' => $id];
+  if (!$isSuper) {
+      $update_query .= " AND school_id=:sid";
+      $update_params[':sid'] = $sid_from_session;
+  }
+  $stmt = $pdo->prepare($update_query);
+  $stmt->execute($update_params);
 
   $label = ($to === 1) ? 'Activated' : 'Disabled';
   audit_log('USER_STATUS', 'users', $id, "{$label} user {$u['username']}");

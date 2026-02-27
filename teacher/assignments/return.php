@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/url.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin', 'teacher']);
+require_role(['it_technician', 'teacher', 'super_admin']);
 
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
@@ -21,9 +21,13 @@ $sid = (int)$_SESSION['user']['school_id'];
 
 // Fetch assignment details
 $stmt = $pdo->prepare("
-    SELECT aa.*, a.asset_code, a.asset_name, a.power_adapter, a.power_adapter_status
+    SELECT aa.*, a.asset_code, a.asset_name, 
+           a.power_adapter, a.power_adapter_status, 
+           a.display_cable, a.display_cable_status, a.display_cable_type,
+           c.name as category_name
     FROM asset_assignments aa
     JOIN assets a ON a.id = aa.asset_id
+    JOIN asset_categories c ON c.id = a.category_id
     WHERE aa.id = :id AND aa.school_id = :sid
     LIMIT 1
 ");
@@ -39,6 +43,7 @@ $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $return_adapter_status = $_POST['return_adapter_status'] ?? 'N/A';
+    $return_display_cable_status = $_POST['return_display_cable_status'] ?? 'N/A';
     $return_notes = trim($_POST['return_notes'] ?? '');
 
     try {
@@ -49,11 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             UPDATE asset_assignments 
             SET returned_date = CURDATE(), 
                 return_adapter_status = :status, 
+                return_display_cable_status = :display_status,
                 return_notes = :notes 
             WHERE id = :id AND school_id = :sid
         ");
         $stmt->execute([
             ':status' => $return_adapter_status,
+            ':display_status' => ($assignment['display_cable'] === 'Yes') ? $return_display_cable_status : 'N/A',
             ':notes' => $return_notes ?: null,
             ':id' => $id,
             ':sid' => $sid
@@ -63,11 +70,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("
             UPDATE assets 
             SET status = 'Available', 
-                power_adapter_status = :adapter_status 
+                power_adapter_status = :adapter_status,
+                display_cable_status = :display_status
             WHERE id = :asset_id AND school_id = :sid
         ");
         $stmt->execute([
             ':adapter_status' => ($assignment['power_adapter'] === 'Yes') ? $return_adapter_status : 'N/A',
+            ':display_status' => ($assignment['display_cable'] === 'Yes') ? $return_display_cable_status : 'N/A',
             ':asset_id' => $assignment['asset_id'],
             ':sid' => $sid
         ]);
@@ -143,6 +152,43 @@ layout_header('Return Asset', 'assignments');
                             <?php endif; ?>
                         </div>
 
+                        <?php 
+                        $catName = strtolower($assignment['category_name']);
+                        $showCable = strpos($catName, 'projector') !== false || strpos($catName, 'desktop') !== false || strpos($catName, 'computer') !== false || strpos($catName, 'printer') !== false;
+                        if ($showCable): 
+                            $cableLabel = (strpos($catName, 'printer') !== false) ? 'Printing' : 'Display';
+                        ?>
+                        <div class="col-12">
+                            <hr class="my-4 opacity-10">
+                            <h6 class="mb-3"><i class="bi bi-hdmi me-2"></i><?php echo $cableLabel; ?> Cable Verification</h6>
+                            <?php if ($assignment['display_cable'] === 'Yes'): ?>
+                                <p class="text-secondary small mb-3">This asset was issued with a <strong><?php echo htmlspecialchars($assignment['display_cable_type']); ?></strong> cable. Please verify its condition.</p>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Cable Condition</label>
+                                        <select class="form-select" name="return_display_cable_status" required>
+                                            <option value="Working" <?php echo ($assignment['display_cable_status'] === 'Working') ? 'selected' : ''; ?>>Working</option>
+                                            <option value="Damaged">Damaged</option>
+                                            <option value="Missing">Missing</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded-3 small text-secondary">
+                                            <i class="bi bi-info-circle me-1"></i> Initial Status: <strong><?php echo htmlspecialchars($assignment['display_cable_status']); ?></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="p-3 bg-light rounded-3 text-secondary">
+                                    <i class="bi bi-info-circle me-1"></i> No <?php echo strtolower($cableLabel); ?> cable was recorded for this asset.
+                                    <input type="hidden" name="return_display_cable_status" value="N/A">
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php else: ?>
+                            <input type="hidden" name="return_display_cable_status" value="N/A">
+                        <?php endif; ?>
+
                         <div class="col-12">
                             <label class="form-label">Return Notes (optional)</label>
                             <textarea class="form-control" name="return_notes" rows="3" placeholder="Any issues or observations during return..."></textarea>
@@ -166,7 +212,8 @@ layout_header('Return Asset', 'assignments');
                 <h6 class="fw-bold mb-3">Return Guidelines</h6>
                 <ul class="small mb-0 opacity-75 list-unstyled d-flex flex-column gap-2">
                     <li><i class="bi bi-check2-circle me-2"></i> Inspect the physical condition of the asset.</li>
-                    <li><i class="bi bi-plug me-2"></i> Check if the charger/adapter is present and functional.</li>
+                    <li><i class="bi bi-plug me-2"></i> Check if the charger/adapter is present.</li>
+                    <li><i class="bi bi-hdmi me-2"></i> Check if the display cable is present.</li>
                     <li><i class="bi bi-chat-left-text me-2"></i> Record any new damages in the notes section.</li>
                     <li><i class="bi bi-arrow-repeat me-2"></i> Status will be updated to "Available" automatically.</li>
                 </ul>

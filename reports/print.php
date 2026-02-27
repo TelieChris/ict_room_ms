@@ -195,11 +195,18 @@ $generatedAt = date('Y-m-d H:i');
       </table>
     </div>
     
-    <!-- Footer -->
-    <div class="mt-4 text-center small text-secondary">
-      <em>This is an automatically generated system report.</em>
+    <div class="mt-5 pt-5 d-flex justify-content-between text-dark text-center" style="page-break-inside: avoid;">
+      <div style="width: 250px;">
+        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
+        <div class="small fw-bold text-uppercase">Prepared By</div>
+        <div class="small text-secondary mt-1">Name, Date & Signature</div>
+      </div>
+      <div style="width: 250px;">
+        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
+        <div class="small fw-bold text-uppercase">Approved By</div>
+        <div class="small text-secondary mt-1">Head Teacher / Principal</div>
+      </div>
     </div>
-    
   </div>
 </body>
 </html>

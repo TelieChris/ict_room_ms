@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/db.php';
@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/audit.php';
 require_once __DIR__ . '/../../includes/url.php';
 
 require_login();
-require_role(['admin']); // delete is admin-only
+require_role(['it_technician', 'super_admin']); // delete is admin-only
 
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);

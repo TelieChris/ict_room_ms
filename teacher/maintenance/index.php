@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/url.php';
 
 require_login();
-require_role(['admin','teacher']);
+require_role(['it_technician','teacher','super_admin','head_teacher']);
 
 $pdo = db();
 
@@ -21,6 +21,12 @@ if ($statusFilter === 'open') {
 } elseif ($statusFilter === 'resolved') {
   $whereClauses[] = "ml.status = 'Resolved'";
 }
+
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $whereClauses[] = "a.location_id = :assigned_lid";
+}
+
 $where = "WHERE " . implode(" AND ", $whereClauses);
 
 $stmt = $pdo->prepare("
@@ -37,7 +43,12 @@ $stmt = $pdo->prepare("
   ORDER BY ml.id DESC
   LIMIT 200
 ");
-$stmt->execute([':sid' => $sid]);
+$params = [':sid' => $sid];
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $params[':assigned_lid'] = $assigned_lid;
+}
+
+$stmt->execute($params);
 $rows = $stmt->fetchAll();
 
 layout_header('Maintenance', 'maintenance');

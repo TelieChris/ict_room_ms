@@ -1,27 +1,32 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
 require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/url.php';
 require_once __DIR__ . '/../../includes/audit.php';
+require_once __DIR__ . '/../../includes/flash.php';
+require_once __DIR__ . '/../../includes/csrf.php';
 
 require_login();
-require_role(['admin','teacher']);
+require_role(['it_technician','teacher','super_admin']);
 
 $pdo = db();
 
 $sid = (int)$_SESSION['user']['school_id'];
 
-// Only allow assigning assets that are currently Available in the current school
-$stmt_assets = $pdo->prepare("
-  SELECT id, asset_code, asset_name
-  FROM assets
-  WHERE status = 'Available' AND school_id = ?
-  ORDER BY asset_name, asset_code
-  LIMIT 500
-");
-$stmt_assets->execute([$sid]);
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
+$asset_sql = "SELECT id, asset_code, asset_name FROM assets WHERE status = 'Available' AND school_id = ?";
+$asset_params = [$sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $asset_sql .= " AND location_id = ?";
+    $asset_params[] = $assigned_lid;
+}
+$asset_sql .= " ORDER BY asset_name, asset_code LIMIT 500";
+
+$stmt_assets = $pdo->prepare($asset_sql);
+$stmt_assets->execute($asset_params);
 $assets = $stmt_assets->fetchAll();
 
 $errors = [];
@@ -59,35 +64,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     $user = auth_user();
     $created_by = (int)$user['id'];
+    $userRole   = $user['role'] ?? '';
+
+    // Teachers submitting their own assignment need approval
+    $needsApproval = ($userRole === 'teacher');
+    $approvalStatus = $needsApproval ? 'pending' : 'approved';
+    $approvedBy     = $needsApproval ? null : $created_by;
+    $approvedAt     = $needsApproval ? null : date('Y-m-d H:i:s');
 
     try {
       $pdo->beginTransaction();
 
       $stmt = $pdo->prepare("
         INSERT INTO asset_assignments
-          (school_id, asset_id, assigned_to_type, assigned_to_name, assigned_date, expected_return_date, returned_date, notes, created_by)
+          (school_id, approval_status, approved_by, approved_at, asset_id, assigned_to_type, assigned_to_name, assigned_date, expected_return_date, returned_date, notes, created_by)
         VALUES
-          (:school_id, :asset_id, :type, :name, :assigned_date, :expected_return_date, NULL, :notes, :created_by)
+          (:school_id, :approval_status, :approved_by, :approved_at, :asset_id, :type, :name, :assigned_date, :expected_return_date, NULL, :notes, :created_by)
       ");
       $stmt->execute([
-        ':school_id' => $sid,
-        ':asset_id' => $asset_id,
-        ':type' => $assigned_to_type,
-        ':name' => $assigned_to_name,
-        ':assigned_date' => $assigned_date,
-        ':expected_return_date' => ($expected_return_date !== '') ? $expected_return_date : null,
-        ':notes' => $notes ?: null,
-        ':created_by' => $created_by,
+        ':school_id'           => $sid,
+        ':approval_status'     => $approvalStatus,
+        ':approved_by'         => $approvedBy,
+        ':approved_at'         => $approvedAt,
+        ':asset_id'            => $asset_id,
+        ':type'                => $assigned_to_type,
+        ':name'                => $assigned_to_name,
+        ':assigned_date'       => $assigned_date,
+        ':expected_return_date'=> ($expected_return_date !== '') ? $expected_return_date : null,
+        ':notes'               => $notes ?: null,
+        ':created_by'          => $created_by,
       ]);
 
-      // Auto status update
-      $pdo->prepare("UPDATE assets SET status='In Use' WHERE id=:id AND school_id=:sid")->execute([':id' => $asset_id, ':sid' => $sid]);
-
       $assignmentId = (int)$pdo->lastInsertId();
+
+      // Only mark asset as In Use if auto-approved
+      if (!$needsApproval) {
+        $pdo->prepare("UPDATE assets SET status='In Use' WHERE id=:id AND school_id=:sid")->execute([':id' => $asset_id, ':sid' => $sid]);
+      }
+
       $pdo->commit();
 
-      audit_log('ASSIGN_CREATE', 'asset_assignments', $assignmentId, "Assigned asset {$asset['asset_code']} to {$assigned_to_type}: {$assigned_to_name}");
+      audit_log('ASSIGN_CREATE', 'asset_assignments', $assignmentId,
+        "Assigned asset {$asset['asset_code']} to {$assigned_to_type}: {$assigned_to_name} [status: {$approvalStatus}]");
 
+      if ($needsApproval) {
+        flash_set('warning', 'Assignment submitted and is awaiting approval by an IT Technician or Head Teacher.');
+      } else {
+        flash_set('success', 'Assignment created successfully.');
+      }
       header('Location: ' . url('/teacher/assignments/index.php'));
       exit;
     } catch (Throwable $e) {
@@ -96,6 +120,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 }
+
+$currentUser = auth_user();
+$myFullName   = $currentUser['full_name'] ?? '';
+$myRole       = $currentUser['role'] ?? '';
 
 layout_header('New Assignment', 'assignments');
 ?>
@@ -135,24 +163,45 @@ layout_header('New Assignment', 'assignments');
         <div class="form-text">If the asset is not listed, it is currently In Use / Maintenance / Lost.</div>
       </div>
 
-      <div class="col-12 col-md-4">
-        <label class="form-label">Assigned To</label>
-        <select class="form-select" name="assigned_to_type" required>
-          <option value="">Select...</option>
-          <?php foreach (['ICT Room','Teacher','Class/Department','Head Teacher','DOD','DOS','Accountant'] as $t): ?>
-            <option value="<?php echo htmlspecialchars($t); ?>" <?php echo (f('assigned_to_type', '') === $t) ? 'selected' : ''; ?>>
-              <?php echo htmlspecialchars($t); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <div class="col-12 col-md-8">
-        <label class="form-label">Name (Teacher / Class / Department)</label>
-        <input class="form-control" name="assigned_to_name" required
-               placeholder="e.g. ICT Room, Mr. Jean, S4 A, Science Dept"
-               value="<?php echo htmlspecialchars(f('assigned_to_name', '')); ?>">
-      </div>
+      <?php if ($myRole === 'teacher'): ?>
+        <!-- Teacher: locked to self-assignment -->
+        <input type="hidden" name="assigned_to_type" value="Teacher">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Assigned To</label>
+          <input class="form-control bg-light" type="text" value="Teacher" disabled>
+          <div class="form-text">Teachers can only assign to themselves.</div>
+        </div>
+        <div class="col-12 col-md-8">
+          <label class="form-label">Your Name</label>
+          <input type="hidden" name="assigned_to_name" value="<?php echo htmlspecialchars($myFullName); ?>">
+          <input class="form-control bg-light" type="text" value="<?php echo htmlspecialchars($myFullName); ?>" disabled>
+          <div class="form-text text-success"><i class="bi bi-person-check me-1"></i>Assigned to you.</div>
+        </div>
+      <?php else: ?>
+        <!-- Non-teacher: full choice -->
+        <div class="col-12 col-md-4">
+          <label class="form-label">Assigned To</label>
+          <select class="form-select" name="assigned_to_type" id="assignedToType" required
+                  data-my-name="<?php echo htmlspecialchars($myFullName); ?>"
+                  data-my-role="<?php echo htmlspecialchars($myRole); ?>">
+            <option value="">Select...</option>
+            <?php foreach (['ICT Room','Teacher','Class/Department','Head Teacher','DOD','DOS','Accountant'] as $t): ?>
+              <option value="<?php echo htmlspecialchars($t); ?>" <?php echo (f('assigned_to_type', '') === $t) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($t); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-12 col-md-8">
+          <label class="form-label">Name (Teacher / Class / Department)</label>
+          <input class="form-control" name="assigned_to_name" id="assignedToName" required
+                 placeholder="e.g. ICT Room, Mr. Jean, S4 A, Science Dept"
+                 value="<?php echo htmlspecialchars(f('assigned_to_name', '')); ?>">
+          <div class="form-text autofill-hint d-none text-success">
+            <i class="bi bi-person-check me-1"></i>Auto-filled with your name. You can still edit it.
+          </div>
+        </div>
+      <?php endif; ?>
 
       <div class="col-12 col-md-4">
         <label class="form-label">Assigned Date</label>
@@ -180,6 +229,47 @@ layout_header('New Assignment', 'assignments');
 </div>
 
 <?php layout_footer(); ?>
+
+<script>
+(function () {
+  const typeSelect  = document.getElementById('assignedToType');
+  const nameInput   = document.getElementById('assignedToName');
+  const hint        = document.querySelector('.autofill-hint');
+  const myName      = typeSelect ? typeSelect.dataset.myName : '';
+
+  function updateAutoFill() {
+    if (!typeSelect || !nameInput) return;
+    if (typeSelect.value === 'Teacher' && myName) {
+      // Only auto-fill if the field is currently empty or was auto-filled
+      if (nameInput.dataset.autofilled === '1' || nameInput.value === '') {
+        nameInput.value = myName;
+        nameInput.dataset.autofilled = '1';
+        hint && hint.classList.remove('d-none');
+      }
+    } else {
+      // Clear only if we previously auto-filled it
+      if (nameInput.dataset.autofilled === '1') {
+        nameInput.value = '';
+        nameInput.dataset.autofilled = '0';
+        hint && hint.classList.add('d-none');
+      }
+    }
+  }
+
+  // Allow user edits to break the auto-fill link
+  nameInput && nameInput.addEventListener('input', function () {
+    if (this.value !== myName) {
+      this.dataset.autofilled = '0';
+      hint && hint.classList.add('d-none');
+    }
+  });
+
+  typeSelect && typeSelect.addEventListener('change', updateAutoFill);
+
+  // Run on page load in case the form is repopulated after an error
+  updateAutoFill();
+})();
+</script>
 
 
 

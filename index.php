@@ -11,6 +11,7 @@ $pdo = db();
 
 // Basic Status Stats
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $stats = [
   'total' => 0,
   'available' => 0,
@@ -19,20 +20,28 @@ $stats = [
   'lost' => 0,
 ];
 
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM assets WHERE school_id = ? AND status = ?");
-$stmt_total = $pdo->prepare("SELECT COUNT(*) FROM assets WHERE school_id = ?");
-$stmt_total->execute([$sid]);
+$scope_where = "school_id = ?";
+$scope_params = [$sid];
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $scope_where .= " AND location_id = ?";
+    $scope_params[] = $assigned_lid;
+}
+
+$stmt_total = $pdo->prepare("SELECT COUNT(*) FROM assets WHERE $scope_where");
+$stmt_total->execute($scope_params);
 $stats['total'] = (int)$stmt_total->fetchColumn();
 
-$stmt_status = $pdo->prepare("SELECT COUNT(*) FROM assets WHERE school_id = ? AND status = ?");
+$stmt_status = $pdo->prepare("SELECT COUNT(*) FROM assets WHERE $scope_where AND status = ?");
 foreach (['Available', 'In Use', 'Maintenance', 'Lost'] as $status) {
-    $stmt_status->execute([$sid, $status]);
+    $curr_params = $scope_params;
+    $curr_params[] = $status;
+    $stmt_status->execute($curr_params);
     $stats[strtolower(str_replace(' ', '_', $status))] = (int)$stmt_status->fetchColumn();
 }
 
 // Condition Stats for Chart
-$stmt_cond = $pdo->prepare("SELECT asset_condition, COUNT(*) as count FROM assets WHERE school_id = ? GROUP BY asset_condition");
-$stmt_cond->execute([$sid]);
+$stmt_cond = $pdo->prepare("SELECT asset_condition, COUNT(*) as count FROM assets WHERE $scope_where GROUP BY asset_condition");
+$stmt_cond->execute($scope_params);
 $conditionData = $stmt_cond->fetchAll(PDO::FETCH_KEY_PAIR);
 $conditions = ['New', 'Good', 'Fair', 'Damaged'];
 $conditionCounts = [];

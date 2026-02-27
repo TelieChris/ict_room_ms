@@ -15,8 +15,14 @@ $location = (int)($_GET['location'] ?? 0);
 $q = trim($_GET['q'] ?? '');
 
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $where = ["a.school_id = :sid"];
 $params = [':sid' => $sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
 
 if ($category > 0) { $where[] = "a.category_id = :category"; $params[':category'] = $category; }
 if ($location > 0) { $where[] = "a.location_id = :location"; $params[':location'] = $location; }
@@ -26,7 +32,9 @@ if ($q !== '') { $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR a.
 $sql = "
   SELECT
     a.asset_code, a.asset_name, a.brand, a.model, a.serial_number,
-    a.purchase_date, a.asset_condition, a.power_adapter, a.power_adapter_status, a.status, a.notes,
+    a.purchase_date, a.asset_condition, a.power_adapter, a.power_adapter_status,
+    a.display_cable, a.display_cable_type, a.display_cable_status,
+    a.status, a.notes,
     c.name AS category_name,
     l.name AS location_name
   FROM assets a
@@ -119,7 +127,7 @@ $generatedAt = date('Y-m-d H:i');
             <th style="width:100px;">Code</th>
             <th>Asset Information</th>
             <th style="width:130px;">Category</th>
-            <th style="width:90px;">Adapter</th>
+            <th style="width:110px;">Cables/Adapters</th>
             <th style="width:90px;">Condition</th>
             <th style="width:100px;">Status</th>
             <th style="width:120px;">Location</th>
@@ -140,10 +148,18 @@ $generatedAt = date('Y-m-d H:i');
                 <div class="small text-secondary"><?php echo htmlspecialchars(trim(($a['brand'] ?? '') . ' ' . ($a['model'] ?? ''))); ?></div>
               </td>
               <td class="small fw-semibold text-secondary"><?php echo htmlspecialchars($a['category_name']); ?></td>
-              <td class="small">
+              <td class="small" style="font-size: 0.65rem;">
                 <?php if ($a['power_adapter'] === 'Yes'): ?>
-                  <span style="color: #16a34a; font-weight: 500; font-size: 0.70rem;">+ <?php echo htmlspecialchars($a['power_adapter_status']); ?></span>
-                <?php else: ?>
+                  <div class="text-success fw-bold">Power Adapter: <?php echo htmlspecialchars($a['power_adapter_status']); ?></div>
+                <?php endif; ?>
+                <?php if ($a['display_cable'] === 'Yes'): ?>
+                  <?php 
+                    $catName = strtolower($a['category_name']);
+                    $cableLabel = (strpos($catName, 'printer') !== false) ? 'Printing Cable' : 'Display Cable';
+                  ?>
+                  <div class="text-info fw-bold"><?php echo $cableLabel; ?>: <?php echo htmlspecialchars($a['display_cable_status']); ?></div>
+                <?php endif; ?>
+                <?php if ($a['power_adapter'] !== 'Yes' && $a['display_cable'] !== 'Yes'): ?>
                   <span class="text-secondary">-</span>
                 <?php endif; ?>
               </td>
@@ -170,13 +186,8 @@ $generatedAt = date('Y-m-d H:i');
       </div>
       <div style="width: 250px;">
         <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
-        <div class="small fw-bold text-uppercase">Reviewed By</div>
-        <div class="small text-secondary mt-1">Head of ICT</div>
-      </div>
-      <div style="width: 250px;">
-        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
         <div class="small fw-bold text-uppercase">Approved By</div>
-        <div class="small text-secondary mt-1">School Manager / Principal</div>
+        <div class="small text-secondary mt-1">Head Teacher / Principal</div>
       </div>
     </div>
 

@@ -14,8 +14,15 @@ $status = trim($_GET['status'] ?? '');
 $category = (int)($_GET['category'] ?? 0);
 
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $where = ["a.school_id = :sid"];
 $params = [':sid' => $sid];
+
+// If user is scoped to a specific location (and not a Super Admin/Head Teacher who sees all)
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
 
 if ($q !== '') {
   // MySQL PDO with emulated prepares disabled cannot reuse the same named placeholder multiple times.
@@ -58,9 +65,11 @@ layout_header('Assets', 'assets');
     <h1 class="h4 mb-1">Assets</h1>
     <div class="text-secondary">Manage inventory, status, and details.</div>
   </div>
+  <?php if (!is_teacher()): ?>
   <a class="btn btn-primary" href="<?php echo htmlspecialchars(url('/admin/assets/create.php')); ?>">
     <i class="bi bi-plus-lg me-1"></i> Add Asset
   </a>
+  <?php endif; ?>
 </div>
 
 <div class="card table-card mb-3">
@@ -110,7 +119,7 @@ layout_header('Assets', 'assets');
             <th>Code</th>
             <th>Asset</th>
             <th>Category</th>
-            <th>Power Adapter</th>
+            <th>Cables/Adapters</th>
             <th>Status</th>
             <th>Location</th>
             <th class="text-end">Actions</th>
@@ -135,13 +144,21 @@ layout_header('Assets', 'assets');
               <td><?php echo htmlspecialchars($a['category_name']); ?></td>
               <td>
                 <?php if ($a['power_adapter'] === 'Yes'): ?>
-                  <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
-                    <i class="bi bi-plug"></i> Yes (<?php echo htmlspecialchars($a['power_adapter_status']); ?>)
-                  </span>
-                <?php else: ?>
-                  <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
-                    No
-                  </span>
+                  <div class="mb-1">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                      <i class="bi bi-plug"></i> Power (<?php echo htmlspecialchars($a['power_adapter_status']); ?>)
+                    </span>
+                  </div>
+                <?php endif; ?>
+                <?php if ($a['display_cable'] === 'Yes'): ?>
+                  <div>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle">
+                      <i class="bi bi-hdmi"></i> <?php echo htmlspecialchars($a['display_cable_type']); ?> (<?php echo htmlspecialchars($a['display_cable_status']); ?>)
+                    </span>
+                  </div>
+                <?php endif; ?>
+                <?php if ($a['power_adapter'] !== 'Yes' && $a['display_cable'] !== 'Yes'): ?>
+                  <span class="text-secondary small">None</span>
                 <?php endif; ?>
               </td>
               <td>
@@ -155,6 +172,7 @@ layout_header('Assets', 'assets');
               </td>
               <td><?php echo htmlspecialchars($a['location_name']); ?></td>
               <td class="text-end">
+                <?php if (!is_teacher()): ?>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars(url('/admin/assets/edit.php')); ?>?id=<?php echo (int)$a['id']; ?>">
                   <i class="bi bi-pencil"></i>
                 </a>
@@ -163,6 +181,9 @@ layout_header('Assets', 'assets');
                    href="<?php echo htmlspecialchars(url('/admin/assets/delete.php')); ?>?id=<?php echo (int)$a['id']; ?>">
                   <i class="bi bi-trash"></i>
                 </a>
+                <?php else: ?>
+                <span class="text-secondary small">View only</span>
+                <?php endif; ?>
               </td>
             </tr>
           <?php endforeach; ?>

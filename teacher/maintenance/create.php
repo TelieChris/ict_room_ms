@@ -7,21 +7,24 @@ require_once __DIR__ . '/../../includes/url.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin','teacher']);
+require_role(['it_technician','teacher','super_admin']);
 
 $pdo = db();
 
 $sid = (int)$_SESSION['user']['school_id'];
 
-// Assets that can be reported (any status) - Scoped to school
-$stmt_assets = $pdo->prepare("
-  SELECT id, asset_code, asset_name, status
-  FROM assets
-  WHERE school_id = ?
-  ORDER BY asset_name, asset_code
-  LIMIT 500
-");
-$stmt_assets->execute([$sid]);
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
+$asset_sql = "SELECT id, asset_code, asset_name, status FROM assets WHERE school_id = ?";
+$asset_params = [$sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $asset_sql .= " AND location_id = ?";
+    $asset_params[] = $assigned_lid;
+}
+$asset_sql .= " ORDER BY asset_name, asset_code LIMIT 500";
+
+$stmt_assets = $pdo->prepare($asset_sql);
+$stmt_assets->execute($asset_params);
 $assets = $stmt_assets->fetchAll();
 
 $errors = [];

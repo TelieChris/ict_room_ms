@@ -14,8 +14,14 @@ $status = trim($_GET['status'] ?? 'Active');
 $q = trim($_GET['q'] ?? '');
 
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $where = ["ast.school_id = :sid"];
 $params = [':sid' => $sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
 
 if ($assigneeType !== '') { $where[] = "ast.assigned_to_type = :atype"; $params[':atype'] = $assigneeType; }
 if ($status === 'Active') { $where[] = "ast.returned_date IS NULL"; } 
@@ -26,7 +32,7 @@ $sql = "
   SELECT 
     ast.id as assignment_id, ast.assigned_to_type, ast.assigned_to_name, 
     ast.assigned_date, ast.expected_return_date, ast.returned_date,
-    ast.return_adapter_status, ast.return_notes, ast.notes as assignment_notes,
+    ast.return_adapter_status, ast.return_display_cable_status, ast.return_notes, ast.notes as assignment_notes,
     a.asset_code, a.asset_name,
     c.name AS category_name
   FROM asset_assignments ast
@@ -135,12 +141,15 @@ $generatedAt = date('Y-m-d H:i');
               <td class="small"><?php echo htmlspecialchars($ast['assigned_date']); ?></td>
               <td class="small text-secondary"><?php echo htmlspecialchars($ast['expected_return_date'] ?: '-'); ?></td>
               <td class="small"><?php echo htmlspecialchars($ast['returned_date'] ?: '-'); ?></td>
-              <td class="small">
+              <td class="small" style="font-size: 0.65rem;">
                 <?php if ($ast['returned_date']): ?>
-                  <strong><?php echo htmlspecialchars($ast['return_adapter_status'] ?: 'N/A'); ?></strong>
-                  <?php if ($ast['return_notes']): ?>
-                    <div class="text-secondary" style="font-size: 0.7rem; line-height: 1.1;"><?php echo htmlspecialchars($ast['return_notes']); ?></div>
+                  <?php if ($ast['return_adapter_status'] && $ast['return_adapter_status'] !== 'N/A'): ?>
+                    <div class="text-success fw-bold">Pwr: <?php echo htmlspecialchars($ast['return_adapter_status']); ?></div>
                   <?php endif; ?>
+                  <?php if ($ast['return_display_cable_status'] && $ast['return_display_cable_status'] !== 'N/A'): ?>
+                    <div class="text-info fw-bold">Cable: <?php echo htmlspecialchars($ast['return_display_cable_status']); ?></div>
+                  <?php endif; ?>
+                  <div class="text-secondary mt-1" style="font-style: italic;"><?php echo htmlspecialchars($ast['return_notes'] ?: '-'); ?></div>
                 <?php else: ?>
                   <span class="text-secondary">-</span>
                 <?php endif; ?>
@@ -164,13 +173,8 @@ $generatedAt = date('Y-m-d H:i');
       </div>
       <div style="width: 250px;">
         <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
-        <div class="small fw-bold text-uppercase">Reviewed By</div>
-        <div class="small text-secondary mt-1">Head of ICT</div>
-      </div>
-      <div style="width: 250px;">
-        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
         <div class="small fw-bold text-uppercase">Approved By</div>
-        <div class="small text-secondary mt-1">School Manager / Principal</div>
+        <div class="small text-secondary mt-1">Head Teacher / Principal</div>
       </div>
     </div>
 

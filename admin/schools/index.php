@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/flash.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin']); // Only admins can manage schools
+require_role(['super_admin']); // Only super admins can manage schools
 
 $pdo = db();
 

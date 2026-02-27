@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -7,20 +7,24 @@ require_once __DIR__ . '/../../includes/audit.php';
 require_once __DIR__ . '/../../includes/url.php';
 
 require_login();
-require_role(['admin','teacher']);
+require_role(['it_technician','super_admin']); // teachers cannot edit assets
 
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
 $sid = (int)$_SESSION['user']['school_id'];
 
-$stmt = $pdo->prepare("
-  SELECT *
-  FROM assets
-  WHERE id = :id AND school_id = :sid
-  LIMIT 1
-");
-$stmt->execute([':id' => $id, ':sid' => $sid]);
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
+$where_asset = "id = :id AND school_id = :sid";
+$asset_params = [':id' => $id, ':sid' => $sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where_asset .= " AND location_id = :assigned_lid";
+    $asset_params[':assigned_lid'] = $assigned_lid;
+}
+
+$stmt = $pdo->prepare("SELECT * FROM assets WHERE $where_asset LIMIT 1");
+$stmt->execute($asset_params);
 $asset = $stmt->fetch();
 if (!$asset) {
   http_response_code(404);
@@ -31,8 +35,17 @@ $stmt_cat = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id
 $stmt_cat->execute([$sid]);
 $categories = $stmt_cat->fetchAll();
 
-$stmt_loc = $pdo->prepare("SELECT id, name FROM locations WHERE school_id = ? ORDER BY name");
-$stmt_loc->execute([$sid]);
+$loc_sql = "SELECT id, name FROM locations WHERE school_id = ?";
+$loc_params = [$sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $loc_sql .= " AND id = ?";
+    $loc_params[] = $assigned_lid;
+}
+$loc_sql .= " ORDER BY name";
+
+$stmt_loc = $pdo->prepare($loc_sql);
+$stmt_loc->execute($loc_params);
 $locations = $stmt_loc->fetchAll();
 
 $errors = [];
@@ -53,6 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $asset_condition = (string)v('asset_condition', $asset['asset_condition']);
   $power_adapter = (string)v('power_adapter', $asset['power_adapter']);
   $power_adapter_status = (string)v('power_adapter_status', $asset['power_adapter_status']);
+  $display_cable = (string)v('display_cable', $asset['display_cable']);
+  $display_cable_type = (string)v('display_cable_type', $asset['display_cable_type']);
+  $display_cable_status = (string)v('display_cable_status', $asset['display_cable_status']);
   $status = (string)v('status', $asset['status']);
   $location_id = (int)v('location_id', $asset['location_id']);
   $notes = trim((string)v('notes', $asset['notes']));
@@ -101,6 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           asset_condition=:asset_condition,
           power_adapter=:power_adapter,
           power_adapter_status=:power_adapter_status,
+          display_cable=:display_cable,
+          display_cable_type=:display_cable_type,
+          display_cable_status=:display_cable_status,
           status=:status,
           location_id=:location_id,
           image_path=:image_path,
@@ -118,6 +137,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':asset_condition' => $asset_condition,
         ':power_adapter' => $power_adapter,
         ':power_adapter_status' => $power_adapter_status,
+        ':display_cable' => $display_cable,
+        ':display_cable_type' => $display_cable_type,
+        ':display_cable_status' => $display_cable_status,
         ':status' => $status,
         ':location_id' => $location_id,
         ':image_path' => $image_path ?: null,
@@ -168,7 +190,7 @@ layout_header('Edit Asset', 'assets');
       </div>
       <div class="col-12 col-md-4">
         <label class="form-label">Category</label>
-        <select class="form-select" name="category_id" required>
+        <select class="form-select" name="category_id" id="category_select" required>
           <option value="">Select...</option>
           <?php foreach ($categories as $c): ?>
             <option value="<?php echo (int)$c['id']; ?>" <?php echo ((int)v('category_id', $asset['category_id']) === (int)$c['id']) ? 'selected' : ''; ?>>
@@ -205,17 +227,44 @@ layout_header('Edit Asset', 'assets');
       </div>
       <div class="col-12 col-md-4">
         <label class="form-label">Power Adapter?</label>
-        <select class="form-select" name="power_adapter">
+        <select class="form-select" name="power_adapter" id="power_adapter_select">
           <option value="No" <?php echo (v('power_adapter', $asset['power_adapter']) === 'No') ? 'selected' : ''; ?>>No</option>
           <option value="Yes" <?php echo (v('power_adapter', $asset['power_adapter']) === 'Yes') ? 'selected' : ''; ?>>Yes</option>
         </select>
       </div>
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-4" id="power_status_group">
         <label class="form-label">Adapter Status</label>
         <select class="form-select" name="power_adapter_status">
           <?php foreach (['N/A','Working','Damaged','Missing'] as $pas): ?>
             <option value="<?php echo htmlspecialchars($pas); ?>" <?php echo (v('power_adapter_status', $asset['power_adapter_status']) === $pas) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($pas); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 cable-group">
+        <label class="form-label" id="cable_label">Display Cable?</label>
+        <select class="form-select" name="display_cable" id="display_cable_select">
+          <option value="No" <?php echo (v('display_cable', $asset['display_cable']) === 'No') ? 'selected' : ''; ?>>No</option>
+          <option value="Yes" <?php echo (v('display_cable', $asset['display_cable']) === 'Yes') ? 'selected' : ''; ?>>Yes</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 cable-group">
+        <label class="form-label" id="cable_type_label">Display Cable Type</label>
+        <select class="form-select" name="display_cable_type">
+          <?php foreach (['N/A','HDMI','VGA','DisplayPort','DVI','USB-C','Printing Cable','Other'] as $dct): ?>
+            <option value="<?php echo htmlspecialchars($dct); ?>" <?php echo (v('display_cable_type', $asset['display_cable_type']) === $dct) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($dct); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 cable-group">
+        <label class="form-label" id="cable_status_label">Display Cable Status</label>
+        <select class="form-select" name="display_cable_status">
+          <?php foreach (['N/A','Working','Damaged','Missing'] as $dcs): ?>
+            <option value="<?php echo htmlspecialchars($dcs); ?>" <?php echo (v('display_cable_status', $asset['display_cable_status']) === $dcs) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($dcs); ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -263,5 +312,54 @@ layout_header('Edit Asset', 'assets');
 </div>
 
 <?php layout_footer(); ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const categorySelect = document.getElementById('category_select');
+  const cableGroups = document.querySelectorAll('.cable-group');
+  const cableLabel = document.getElementById('cable_label');
+  const cableTypeLabel = document.getElementById('cable_type_label');
+  const cableStatusLabel = document.getElementById('cable_status_label');
+  const powerAdapterSelect = document.getElementById('power_adapter_select');
+  const powerStatusGroup = document.getElementById('power_status_group');
+
+  function updateVisibility() {
+    if (!categorySelect || !cableLabel) return;
+    
+    const categoryName = categorySelect.options[categorySelect.selectedIndex].text.toLowerCase();
+    const isProjector = categoryName.includes('projector');
+    const isDesktop = categoryName.includes('desktop') || categoryName.includes('computer');
+    const isPrinter = categoryName.includes('printer');
+
+    if (isProjector || isDesktop || isPrinter) {
+      cableGroups.forEach(g => g.style.display = 'block');
+      if (isPrinter) {
+        cableLabel.textContent = 'Printing Cable?';
+        if (cableTypeLabel) cableTypeLabel.textContent = 'Printing Cable Type';
+        if (cableStatusLabel) cableStatusLabel.textContent = 'Printing Cable Status';
+      } else {
+        cableLabel.textContent = 'Display Cable?';
+        if (cableTypeLabel) cableTypeLabel.textContent = 'Display Cable Type';
+        if (cableStatusLabel) cableStatusLabel.textContent = 'Display Cable Status';
+      }
+    } else {
+      cableGroups.forEach(g => g.style.display = 'none');
+    }
+
+    // Power adapter status visibility
+    if (powerAdapterSelect && powerStatusGroup) {
+      if (powerAdapterSelect.value === 'Yes') {
+        powerStatusGroup.style.display = 'block';
+      } else {
+        powerStatusGroup.style.display = 'none';
+      }
+    }
+  }
+
+  if (categorySelect) categorySelect.addEventListener('change', updateVisibility);
+  if (powerAdapterSelect) powerAdapterSelect.addEventListener('change', updateVisibility);
+  updateVisibility();
+});
+</script>
 
 

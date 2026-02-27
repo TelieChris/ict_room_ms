@@ -71,6 +71,24 @@ layout_header('Reports Dashboard', 'reports');
       </div>
     </div>
   </div>
+
+  <!-- Summary & Analytics Report Card -->
+  <div class="col-12 col-md-4">
+    <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+      <div class="card-body p-4 d-flex flex-column">
+        <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+          <i class="bi bi-graph-up-arrow fs-3"></i>
+        </div>
+        <h4 class="h5 fw-bold mb-2">Summary & Analytics</h4>
+        <p class="text-secondary small mb-4 flex-grow-1">
+          Visual overview of asset quantities, status distribution, and hardware health metrics across all categories.
+        </p>
+        <a href="<?php echo htmlspecialchars(url('/reports/summary.php')); ?>" class="btn btn-outline-info w-100 fw-semibold rounded-pill">
+          View Report <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Run in browser once (then delete) OR run via CLI:
  * php database/seed_admin.php
@@ -9,19 +9,19 @@
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/db.php';
 
-$username = 'admin';
+$username = 'it_technician';
 $password = 'Admin@12345'; // change after first login
 
 $pdo = db();
 
 // Ensure roles exist
 $pdo->exec("INSERT INTO roles (name, description) VALUES
-('admin','IT Technician - full access'),
+('it_technician','IT Technician - full access'),
 ('teacher','ICT Teacher/Lab Assistant - manage usage & report issues'),
-('viewer','School management - view only')
+('head_teacher','School management - view only')
 ON DUPLICATE KEY UPDATE description=VALUES(description)");
 
-$stmt = $pdo->prepare("SELECT id FROM roles WHERE name='admin' LIMIT 1");
+$stmt = $pdo->prepare("SELECT id FROM roles WHERE name='it_technician' LIMIT 1");
 $stmt->execute();
 $roleId = (int)$stmt->fetchColumn();
 if ($roleId <= 0) {

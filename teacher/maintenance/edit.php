@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/url.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin','teacher']);
+require_role(['it_technician','teacher','super_admin']);
 
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);

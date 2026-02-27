@@ -15,8 +15,14 @@ $status = trim($_GET['status'] ?? 'Active'); // Default to active assignments
 $q = trim($_GET['q'] ?? '');
 
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $where = ["ast.school_id = :sid"];
 $params = [':sid' => $sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
 
 if ($assigneeType !== '') {
   $where[] = "ast.assigned_to_type = :atype";
@@ -38,7 +44,7 @@ $sql = "
   SELECT 
     ast.id as assignment_id, ast.assigned_to_type, ast.assigned_to_name, 
     ast.assigned_date, ast.expected_return_date, ast.returned_date,
-    ast.return_adapter_status, ast.return_notes, ast.notes as assignment_notes,
+    ast.return_adapter_status, ast.return_display_cable_status, ast.return_notes, ast.notes as assignment_notes,
     a.asset_code, a.asset_name,
     c.name AS category_name
   FROM asset_assignments ast
@@ -136,7 +142,7 @@ layout_header('Assignments Report', 'reports');
             <th>Assigned Date</th>
             <th>Expected Return</th>
             <th>Returned Date</th>
-            <th>Adapter (Return)</th>
+            <th>Adapter/Cable (Return)</th>
             <th>Return Notes</th>
             <th>Status</th>
           </tr>
@@ -159,13 +165,25 @@ layout_header('Assignments Report', 'reports');
               <td class="small"><?php echo htmlspecialchars($ast['returned_date'] ?: '-'); ?></td>
               <td class="small">
                 <?php if ($ast['returned_date']): ?>
-                  <?php if ($ast['return_adapter_status'] === 'Working'): ?>
-                    <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Working</span>
-                  <?php elseif ($ast['return_adapter_status'] === 'Damaged'): ?>
-                    <span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Damaged</span>
-                  <?php elseif ($ast['return_adapter_status'] === 'Missing'): ?>
-                    <span class="text-dark"><i class="bi bi-x-circle-fill me-1"></i>Missing</span>
-                  <?php else: ?>
+                  <div class="mb-1">
+                    <?php if ($ast['return_adapter_status'] === 'Working'): ?>
+                      <span class="text-success small"><i class="bi bi-plug"></i> Pwr: Working</span>
+                    <?php elseif ($ast['return_adapter_status'] === 'Damaged'): ?>
+                      <span class="text-danger small"><i class="bi bi-plug"></i> Pwr: Damaged</span>
+                    <?php elseif ($ast['return_adapter_status'] === 'Missing'): ?>
+                      <span class="text-dark small"><i class="bi bi-plug"></i> Pwr: Missing</span>
+                    <?php endif; ?>
+                  </div>
+                  <div>
+                    <?php if ($ast['return_display_cable_status'] === 'Working'): ?>
+                      <span class="text-info small"><i class="bi bi-hdmi"></i> Cable: Working</span>
+                    <?php elseif ($ast['return_display_cable_status'] === 'Damaged'): ?>
+                      <span class="text-danger small"><i class="bi bi-hdmi"></i> Cable: Damaged</span>
+                    <?php elseif ($ast['return_display_cable_status'] === 'Missing'): ?>
+                      <span class="text-dark small"><i class="bi bi-hdmi"></i> Cable: Missing</span>
+                    <?php endif; ?>
+                  </div>
+                  <?php if (!$ast['return_adapter_status'] && !$ast['return_display_cable_status']): ?>
                     <span class="text-secondary">-</span>
                   <?php endif; ?>
                 <?php else: ?>

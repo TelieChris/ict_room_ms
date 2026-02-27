@@ -16,8 +16,14 @@ $location = (int)($_GET['location'] ?? 0);
 $q = trim($_GET['q'] ?? '');
 
 $sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
 $where = ["a.school_id = :sid"];
 $params = [':sid' => $sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $where[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
 
 if ($category > 0) {
   $where[] = "a.category_id = :category";
@@ -39,7 +45,9 @@ if ($q !== '') {
 $sql = "
   SELECT
     a.asset_code, a.asset_name, a.brand, a.model, a.serial_number,
-    a.purchase_date, a.asset_condition, a.power_adapter, a.power_adapter_status, a.status, a.notes,
+    a.purchase_date, a.asset_condition, a.power_adapter, a.power_adapter_status,
+    a.display_cable, a.display_cable_type, a.display_cable_status,
+    a.status, a.notes,
     c.name AS category_name,
     l.name AS location_name
   FROM assets a
@@ -150,7 +158,7 @@ layout_header('Inventory Report', 'reports');
             <th>Code</th>
             <th>Asset</th>
             <th>Category</th>
-            <th>Adapter</th>
+            <th>Adapter/Cables</th>
             <th>Condition</th>
             <th>Status</th>
             <th>Location</th>
@@ -173,8 +181,16 @@ layout_header('Inventory Report', 'reports');
               <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"><?php echo htmlspecialchars($a['category_name']); ?></span></td>
               <td class="small">
                 <?php if ($a['power_adapter'] === 'Yes'): ?>
-                  <span class="text-success"><i class="bi bi-plug"></i> <?php echo htmlspecialchars($a['power_adapter_status']); ?></span>
-                <?php else: ?>
+                  <div class="text-success small"><i class="bi bi-plug"></i> Power Adapter: <?php echo htmlspecialchars($a['power_adapter_status']); ?></div>
+                <?php endif; ?>
+                <?php if ($a['display_cable'] === 'Yes'): ?>
+                  <?php 
+                    $catName = strtolower($a['category_name']);
+                    $cableLabel = (strpos($catName, 'printer') !== false) ? 'Printing Cable' : 'Display Cable';
+                  ?>
+                  <div class="text-info small"><i class="bi bi-hdmi"></i> <?php echo $cableLabel; ?>: <?php echo htmlspecialchars($a['display_cable_status']); ?> (<?php echo htmlspecialchars($a['display_cable_type']); ?>)</div>
+                <?php endif; ?>
+                <?php if ($a['power_adapter'] !== 'Yes' && $a['display_cable'] !== 'Yes'): ?>
                   <span class="text-secondary">-</span>
                 <?php endif; ?>
               </td>

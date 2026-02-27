@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/db.php';
@@ -6,21 +6,32 @@ require_once __DIR__ . '/../../includes/url.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin','teacher']);
+require_role(['it_technician','teacher','super_admin']);
 
 $pdo = db();
 
 $statusFilter = trim($_GET['status'] ?? 'open'); // open|inprogress|resolved|all
-$where = '';
+$sid = (int)$_SESSION['user']['school_id'];
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
+$whereClauses = ["ml.school_id = :sid"];
+$params = [':sid' => $sid];
+
 if ($statusFilter === 'open') {
-  $where = "WHERE ml.status = 'Open'";
+  $whereClauses[] = "ml.status = 'Open'";
 } elseif ($statusFilter === 'inprogress') {
-  $where = "WHERE ml.status = 'In Progress'";
+  $whereClauses[] = "ml.status = 'In Progress'";
 } elseif ($statusFilter === 'resolved') {
-  $where = "WHERE ml.status = 'Resolved'";
+  $whereClauses[] = "ml.status = 'Resolved'";
 }
 
-$stmt = $pdo->query("
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $whereClauses[] = "a.location_id = :assigned_lid";
+    $params[':assigned_lid'] = $assigned_lid;
+}
+
+$where = "WHERE " . implode(" AND ", $whereClauses);
+
+$stmt = $pdo->prepare("
   SELECT
     ml.*,
     a.asset_code, a.asset_name,
@@ -34,6 +45,7 @@ $stmt = $pdo->query("
   ORDER BY ml.id DESC
   LIMIT 2000
 ");
+$stmt->execute($params);
 $rows = $stmt->fetchAll();
 
 audit_log('REPORT_PRINT', 'maintenance_logs', null, 'Printed maintenance report');
@@ -117,6 +129,17 @@ $generatedAt = date('Y-m-d H:i');
           <?php endforeach; ?>
         </tbody>
       </table>
+    <div class="mt-5 pt-5 d-flex justify-content-between text-dark text-center" style="page-break-inside: avoid;">
+      <div style="width: 250px;">
+        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
+        <div class="small fw-bold text-uppercase">Prepared By</div>
+        <div class="small text-secondary mt-1">Name, Date & Signature</div>
+      </div>
+      <div style="width: 250px;">
+        <div class="fw-semibold mb-4 pb-2 border-bottom border-dark border-opacity-25"></div>
+        <div class="small fw-bold text-uppercase">Approved By</div>
+        <div class="small text-secondary mt-1">Head Teacher / Principal</div>
+      </div>
     </div>
   </div>
 </body>

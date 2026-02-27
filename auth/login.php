@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } else {
     $pdo = db();
     $stmt = $pdo->prepare("
-      SELECT u.id, u.username, u.full_name, u.password_hash, u.is_active, u.school_id, r.name AS role, s.name AS school_name
+      SELECT u.id, u.username, u.full_name, u.password_hash, u.is_active, u.school_id, u.location_id, r.name AS role, s.name AS school_name
       FROM users u
       JOIN roles r ON r.id = u.role_id
       JOIN schools s ON s.id = u.school_id
@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role' => $user['role'],
         'school_id' => (int)$user['school_id'],
         'school_name' => $user['school_name'],
+        'location_id' => $user['location_id'] ? (int)$user['location_id'] : null,
       ];
 
       $pdo->prepare("UPDATE users SET last_login_at = NOW() WHERE id = :id")->execute([':id' => (int)$user['id']]);

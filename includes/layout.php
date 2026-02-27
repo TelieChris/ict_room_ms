@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/auth.php';
@@ -15,14 +15,16 @@ function layout_header(string $title, string $active = ''): void
   $appTitle = APP_NAME;
 
   $navItems = [
-    ['label' => 'Dashboard', 'icon' => 'bi-speedometer2', 'href' => url('/index.php'), 'key' => 'dashboard', 'roles' => ['admin','teacher','viewer']],
-    ['label' => 'Assets', 'icon' => 'bi-pc-display', 'href' => url('/admin/assets/index.php'), 'key' => 'assets', 'roles' => ['admin','teacher','viewer']],
-    ['label' => 'Assignments', 'icon' => 'bi-box-arrow-in-right', 'href' => url('/teacher/assignments/index.php'), 'key' => 'assignments', 'roles' => ['admin','teacher','viewer']],
-    ['label' => 'Maintenance', 'icon' => 'bi-wrench-adjustable', 'href' => url('/teacher/maintenance/index.php'), 'key' => 'maintenance', 'roles' => ['admin','teacher']],
-    ['label' => 'Reports', 'icon' => 'bi-file-earmark-text', 'href' => url('/reports/index.php'), 'key' => 'reports', 'roles' => ['admin','teacher','viewer']],
-    ['label' => 'Audit Log', 'icon' => 'bi-journal-check', 'href' => url('/admin/audit/index.php'), 'key' => 'audit', 'roles' => ['admin']],
-    ['label' => 'Users', 'icon' => 'bi-people', 'href' => url('/admin/users/index.php'), 'key' => 'users', 'roles' => ['admin']],
-    ['label' => 'Schools', 'icon' => 'bi-building', 'href' => url('/admin/schools/index.php'), 'key' => 'schools', 'roles' => ['admin']],
+    ['label' => 'Dashboard',    'icon' => 'bi-speedometer2',      'href' => url('/index.php'),                         'key' => 'dashboard',   'roles' => ['super_admin','it_technician','teacher','head_teacher']],
+    ['label' => 'Assets',       'icon' => 'bi-pc-display',        'href' => url('/admin/assets/index.php'),            'key' => 'assets',      'roles' => ['super_admin','it_technician','teacher','head_teacher']],
+    ['label' => 'Assignments',  'icon' => 'bi-box-arrow-in-right','href' => url('/teacher/assignments/index.php'),     'key' => 'assignments', 'roles' => ['super_admin','it_technician','teacher','head_teacher']],
+    ['label' => 'Maintenance',  'icon' => 'bi-wrench-adjustable', 'href' => url('/teacher/maintenance/index.php'),     'key' => 'maintenance', 'roles' => ['super_admin','it_technician','teacher','head_teacher']],
+    ['label' => 'Reports',      'icon' => 'bi-file-earmark-text', 'href' => url('/reports/index.php'),                 'key' => 'reports',     'roles' => ['super_admin','it_technician','head_teacher']],
+    ['label' => 'Approvals',    'icon' => 'bi-clipboard2-check',  'href' => url('/admin/approvals/index.php'),          'key' => 'approvals',   'roles' => ['super_admin','head_teacher']],
+    ['label' => 'Audit Log',    'icon' => 'bi-journal-check',     'href' => url('/admin/audit/index.php'),             'key' => 'audit',       'roles' => ['super_admin','it_technician']],
+    ['label' => 'Users',        'icon' => 'bi-people',            'href' => url('/admin/users/index.php'),             'key' => 'users',       'roles' => ['super_admin']],
+    ['label' => 'Schools',      'icon' => 'bi-building',          'href' => url('/admin/schools/index.php'),           'key' => 'schools',     'roles' => ['super_admin']],
+    ['label' => 'ICT Labs',     'icon' => 'bi-router',            'href' => url('/admin/locations/index.php'),         'key' => 'locations',   'roles' => ['super_admin']],
   ];
 
   ?>

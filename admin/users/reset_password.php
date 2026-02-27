@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -9,15 +9,22 @@ require_once __DIR__ . '/../../includes/flash.php';
 require_once __DIR__ . '/../../includes/audit.php';
 
 require_login();
-require_role(['admin']);
+require_role(['super_admin']);
 
 $pdo = db();
 $id = (int)($_GET['id'] ?? 0);
 
-$sid = (int)$_SESSION['user']['school_id'];
+$isSuper = is_super_admin();
+$sid_from_session = (int)$_SESSION['user']['school_id'];
 
-$stmt = $pdo->prepare("SELECT id, username, full_name FROM users WHERE id=:id AND school_id=:sid LIMIT 1");
-$stmt->execute([':id' => $id, ':sid' => $sid]);
+$query = "SELECT id, username, full_name FROM users WHERE id=:id";
+$params = [':id' => $id];
+if (!$isSuper) {
+    $query .= " AND school_id=:sid";
+    $params[':sid'] = $sid_from_session;
+}
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $u = $stmt->fetch();
 if (!$u) {
   flash_set('error', 'User not found.');
@@ -39,8 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     try {
       $hash = password_hash($p1, PASSWORD_DEFAULT);
-      $stmt = $pdo->prepare("UPDATE users SET password_hash=:h WHERE id=:id AND school_id=:sid");
-      $stmt->execute([':h' => $hash, ':id' => (int)$u['id'], ':sid' => $sid]);
+      $update_query = "UPDATE users SET password_hash=:h WHERE id=:id";
+      $update_params = [':h' => $hash, ':id' => (int)$u['id']];
+      if (!$isSuper) {
+          $update_query .= " AND school_id=:sid";
+          $update_params[':sid'] = $sid_from_session;
+      }
+      $stmt = $pdo->prepare($update_query);
+      $stmt->execute($update_params);
 
       audit_log('USER_PASSWORD_RESET', 'users', (int)$u['id'], "Reset password for {$u['username']}");
       flash_set('success', 'Password reset successfully.');

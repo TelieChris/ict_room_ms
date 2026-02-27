@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/layout.php';
@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/audit.php';
 require_once __DIR__ . '/../../includes/url.php';
 
 require_login();
-require_role(['admin','teacher']); // viewers cannot create
+require_role(['it_technician','super_admin']); // teachers cannot create assets
 
 $pdo = db();
 $sid = (int)$_SESSION['user']['school_id'];
@@ -16,8 +16,18 @@ $stmt_cat = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id
 $stmt_cat->execute([$sid]);
 $categories = $stmt_cat->fetchAll();
 
-$stmt_loc = $pdo->prepare("SELECT id, name FROM locations WHERE school_id = ? ORDER BY name");
-$stmt_loc->execute([$sid]);
+$assigned_lid = $_SESSION['user']['location_id'] ?? null;
+$loc_sql = "SELECT id, name FROM locations WHERE school_id = ?";
+$loc_params = [$sid];
+
+if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
+    $loc_sql .= " AND id = ?";
+    $loc_params[] = $assigned_lid;
+}
+$loc_sql .= " ORDER BY name";
+
+$stmt_loc = $pdo->prepare($loc_sql);
+$stmt_loc->execute($loc_params);
 $locations = $stmt_loc->fetchAll();
 
 $errors = [];
@@ -38,6 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $asset_condition = (string)field('asset_condition', 'Good');
   $power_adapter = (string)field('power_adapter', 'No');
   $power_adapter_status = (string)field('power_adapter_status', 'N/A');
+  $display_cable = (string)field('display_cable', 'No');
+  $display_cable_type = (string)field('display_cable_type', 'N/A');
+  $display_cable_status = (string)field('display_cable_status', 'N/A');
   $status = (string)field('status', 'Available');
   $location_id = (int)field('location_id', 0);
   $notes = trim((string)field('notes'));
@@ -75,9 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!$errors) {
     $stmt = $pdo->prepare("
       INSERT INTO assets
-      (school_id, asset_code, asset_name, category_id, brand, model, serial_number, purchase_date, asset_condition, power_adapter, power_adapter_status, status, location_id, image_path, notes)
+      (school_id, asset_code, asset_name, category_id, brand, model, serial_number, purchase_date, asset_condition, power_adapter, power_adapter_status, display_cable, display_cable_type, display_cable_status, status, location_id, image_path, notes)
       VALUES
-      (:school_id, :asset_code, :asset_name, :category_id, :brand, :model, :serial_number, :purchase_date, :asset_condition, :power_adapter, :power_adapter_status, :status, :location_id, :image_path, :notes)
+      (:school_id, :asset_code, :asset_name, :category_id, :brand, :model, :serial_number, :purchase_date, :asset_condition, :power_adapter, :power_adapter_status, :display_cable, :display_cable_type, :display_cable_status, :status, :location_id, :image_path, :notes)
     ");
     try {
       $stmt->execute([
@@ -92,6 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':asset_condition' => $asset_condition,
         ':power_adapter' => $power_adapter,
         ':power_adapter_status' => $power_adapter_status,
+        ':display_cable' => $display_cable,
+        ':display_cable_type' => $display_cable_type,
+        ':display_cable_status' => $display_cable_status,
         ':status' => $status,
         ':location_id' => $location_id,
         ':image_path' => $image_path,
@@ -178,17 +194,44 @@ layout_header('Add Asset', 'assets');
       </div>
       <div class="col-12 col-md-4">
         <label class="form-label">Power Adapter?</label>
-        <select class="form-select" name="power_adapter">
+        <select class="form-select" name="power_adapter" id="power_adapter_select">
           <option value="No" <?php echo (field('power_adapter','No') === 'No') ? 'selected' : ''; ?>>No</option>
           <option value="Yes" <?php echo (field('power_adapter','No') === 'Yes') ? 'selected' : ''; ?>>Yes</option>
         </select>
       </div>
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-4" id="power_status_group">
         <label class="form-label">Adapter Status</label>
         <select class="form-select" name="power_adapter_status">
           <?php foreach (['N/A','Working','Damaged','Missing'] as $pas): ?>
             <option value="<?php echo htmlspecialchars($pas); ?>" <?php echo (field('power_adapter_status','N/A') === $pas) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($pas); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 cable-group">
+        <label class="form-label" id="cable_label">Display Cable?</label>
+        <select class="form-select" name="display_cable" id="display_cable_select">
+          <option value="No" <?php echo (field('display_cable','No') === 'No') ? 'selected' : ''; ?>>No</option>
+          <option value="Yes" <?php echo (field('display_cable','No') === 'Yes') ? 'selected' : ''; ?>>Yes</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 cable-group">
+        <label class="form-label" id="cable_type_label">Display Cable Type</label>
+        <select class="form-select" name="display_cable_type">
+          <?php foreach (['N/A','HDMI','VGA','DisplayPort','DVI','USB-C','Printing Cable','Other'] as $dct): ?>
+            <option value="<?php echo htmlspecialchars($dct); ?>" <?php echo (field('display_cable_type','N/A') === $dct) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($dct); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 cable-group">
+        <label class="form-label" id="cable_status_label">Display Cable Status</label>
+        <select class="form-select" name="display_cable_status">
+          <?php foreach (['N/A','Working','Damaged','Missing'] as $dcs): ?>
+            <option value="<?php echo htmlspecialchars($dcs); ?>" <?php echo (field('display_cable_status','N/A') === $dcs) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($dcs); ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -234,5 +277,50 @@ layout_header('Add Asset', 'assets');
 </div>
 
 <?php layout_footer(); ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const categorySelect = document.querySelector('select[name="category_id"]');
+  const cableGroups = document.querySelectorAll('.cable-group');
+  const cableLabel = document.getElementById('cable_label');
+  const cableTypeLabel = document.getElementById('cable_type_label');
+  const cableStatusLabel = document.getElementById('cable_status_label');
+  const powerAdapterSelect = document.getElementById('power_adapter_select');
+  const powerStatusGroup = document.getElementById('power_status_group');
+
+  function updateVisibility() {
+    const categoryName = categorySelect.options[categorySelect.selectedIndex].text.toLowerCase();
+    const isProjector = categoryName.includes('projector');
+    const isDesktop = categoryName.includes('desktop') || categoryName.includes('computer');
+    const isPrinter = categoryName.includes('printer');
+
+    if (isProjector || isDesktop || isPrinter) {
+      cableGroups.forEach(g => g.style.display = 'block');
+      if (isPrinter) {
+        cableLabel.textContent = 'Printing Cable?';
+        cableTypeLabel.textContent = 'Printing Cable Type';
+        cableStatusLabel.textContent = 'Printing Cable Status';
+      } else {
+        cableLabel.textContent = 'Display Cable?';
+        cableTypeLabel.textContent = 'Display Cable Type';
+        cableStatusLabel.textContent = 'Display Cable Status';
+      }
+    } else {
+      cableGroups.forEach(g => g.style.display = 'none');
+    }
+
+    // Power adapter status visibility
+    if (powerAdapterSelect.value === 'Yes') {
+      powerStatusGroup.style.display = 'block';
+    } else {
+      powerStatusGroup.style.display = 'none';
+    }
+  }
+
+  categorySelect.addEventListener('change', updateVisibility);
+  powerAdapterSelect.addEventListener('change', updateVisibility);
+  updateVisibility();
+});
+</script>
 
 
