@@ -127,7 +127,7 @@ layout_header('Inventory Report', 'reports');
         <label class="form-label small text-secondary">Status</label>
         <select class="form-select" name="status">
           <option value="">All Statuses</option>
-          <?php foreach (['Available','In Use','Maintenance','Lost'] as $s): ?>
+          <?php foreach (['Available','In Use','Maintenance','Lost','Faulty'] as $s): ?>
             <option value="<?php echo htmlspecialchars($s); ?>" <?php echo ($status === $s) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($s); ?>
             </option>
@@ -201,7 +201,8 @@ layout_header('Inventory Report', 'reports');
                   if ($a['status'] === 'Available') $statusColor = 'success';
                   elseif ($a['status'] === 'In Use') $statusColor = 'warning';
                   elseif ($a['status'] === 'Maintenance') $statusColor = 'danger';
-                  elseif ($a['status'] === 'Lost') $statusColor = 'dark';
+                  elseif ($a['status'] === 'Faulty') $statusColor = 'dark';
+                  elseif ($a['status'] === 'Lost') $statusColor = 'secondary';
                 ?>
                 <span class="badge bg-<?php echo $statusColor; ?> bg-opacity-10 text-<?php echo $statusColor; ?> border border-<?php echo $statusColor; ?>-subtle">
                   <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem; vertical-align: middle;"></i>

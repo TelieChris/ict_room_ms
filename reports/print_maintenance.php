@@ -27,7 +27,7 @@ if ($q !== '') { $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR m.
 
 $sql = "
   SELECT 
-    m.id as maintenance_id, m.issue_description, m.reported_date, 
+    m.id as maintenance_id, m.issue_description, m.reported_date, m.resolved_date,
     m.action_taken, m.technician_name, m.cost, m.status as log_status,
     a.asset_code, a.asset_name,
     c.name AS category_name
@@ -80,6 +80,7 @@ $generatedAt = date('Y-m-d H:i');
     .status-Open { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     .status-In-Progress { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; }
     .status-Resolved { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-Faulty { background-color: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; }
   </style>
 </head>
 <body>
@@ -107,7 +108,7 @@ $generatedAt = date('Y-m-d H:i');
       <table class="table table-bordered table-sm align-middle">
         <thead>
           <tr>
-            <th style="width:110px;">Reported On</th>
+            <th style="width:120px;">Reported / Resolved</th>
             <th>Asset Information</th>
             <th style="width:250px;">Issue Description</th>
             <th style="width:100px;">Status</th>
@@ -125,7 +126,12 @@ $generatedAt = date('Y-m-d H:i');
               $statusClass = 'status-' . str_replace(' ', '-', $log['log_status']);
             ?>
             <tr>
-              <td class="small fw-semibold"><?php echo htmlspecialchars($log['reported_date']); ?></td>
+              <td class="small">
+                <div class="fw-semibold">Rep: <?php echo htmlspecialchars($log['reported_date']); ?></div>
+                <?php if ($log['log_status'] === 'Resolved' && !empty($log['resolved_date'])): ?>
+                  <div class="text-success fw-bold">Res: <?php echo htmlspecialchars($log['resolved_date']); ?></div>
+                <?php endif; ?>
+              </td>
               <td>
                 <div class="fw-bold text-danger"><?php echo htmlspecialchars($log['asset_code']); ?></div>
                 <div class="small text-secondary"><?php echo htmlspecialchars($log['asset_name']); ?></div>

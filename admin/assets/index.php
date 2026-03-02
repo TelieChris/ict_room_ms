@@ -83,7 +83,7 @@ layout_header('Assets', 'assets');
         <label class="form-label small text-secondary">Status</label>
         <select class="form-select" name="status">
           <option value="">All</option>
-          <?php foreach (['Available','In Use','Maintenance','Lost'] as $s): ?>
+          <?php foreach (['Available','In Use','Maintenance','Lost','Faulty'] as $s): ?>
             <option value="<?php echo htmlspecialchars($s); ?>" <?php echo ($status === $s) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($s); ?>
             </option>
@@ -165,8 +165,10 @@ layout_header('Assets', 'assets');
                 <?php
                   $badge = 'secondary';
                   if ($a['status'] === 'Available') $badge = 'success';
-                  elseif ($a['status'] === 'In Use') $badge = 'warning';
+                  elseif ($a['status'] === 'In Use') $badge = 'warning text-dark';
                   elseif ($a['status'] === 'Maintenance') $badge = 'danger';
+                  elseif ($a['status'] === 'Faulty') $badge = 'dark';
+                  elseif ($a['status'] === 'Lost') $badge = 'secondary';
                 ?>
                 <span class="badge text-bg-<?php echo $badge; ?>"><?php echo htmlspecialchars($a['status']); ?></span>
               </td>

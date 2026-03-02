@@ -31,6 +31,7 @@ $sql = "
         SUM(CASE WHEN a.status = 'In Use' THEN 1 ELSE 0 END) as count_in_use,
         SUM(CASE WHEN a.status = 'Maintenance' THEN 1 ELSE 0 END) as count_maintenance,
         SUM(CASE WHEN a.status = 'Lost' THEN 1 ELSE 0 END) as count_lost,
+        SUM(CASE WHEN a.status = 'Faulty' THEN 1 ELSE 0 END) as count_faulty,
         
         -- Power Adapter Stats
         SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Working' THEN 1 ELSE 0 END) as pwr_working,
@@ -59,6 +60,7 @@ $totals = [
     'in_use' => 0,
     'maintenance' => 0,
     'lost' => 0,
+    'faulty' => 0,
     'pwr_working' => 0,
     'pwr_damaged' => 0,
     'pwr_missing' => 0,
@@ -74,6 +76,7 @@ foreach ($summary as $row) {
         $totals['in_use'] += $row['count_in_use'];
         $totals['maintenance'] += $row['count_maintenance'];
         $totals['lost'] += $row['count_lost'];
+        $totals['faulty'] += $row['count_faulty'];
         $totals['pwr_working'] += $row['pwr_working'];
         $totals['pwr_damaged'] += $row['pwr_damaged'];
         $totals['pwr_missing'] += $row['pwr_missing'];
@@ -130,8 +133,8 @@ layout_header('Inventory Summary & Analytics', 'reports');
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm bg-danger text-white">
             <div class="card-body p-3">
-                <div class="small opacity-75">Lost / Damaged</div>
-                <div class="h3 fw-bold mb-0"><?php echo number_format($totals['lost']); ?></div>
+                <div class="small opacity-75">Lost / Damaged / Faulty</div>
+                <div class="h3 fw-bold mb-0"><?php echo number_format($totals['lost'] + $totals['faulty']); ?></div>
             </div>
         </div>
     </div>
@@ -176,6 +179,7 @@ layout_header('Inventory Summary & Analytics', 'reports');
                                         <div class="d-flex gap-2">
                                             <span class="text-warning" title="Maintenance">● <?php echo $row['count_maintenance']; ?></span>
                                             <span class="text-danger" title="Lost">● <?php echo $row['count_lost']; ?></span>
+                                            <span class="text-dark" title="Faulty">● <?php echo $row['count_faulty']; ?></span>
                                         </div>
                                     </div>
                                 </td>

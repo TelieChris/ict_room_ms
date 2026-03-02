@@ -98,6 +98,7 @@ $generatedAt = date('Y-m-d H:i');
     .status-In-Use { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; }
     .status-Maintenance { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     .status-Lost { background-color: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    .status-Faulty { background-color: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; }
   </style>
 </head>
 <body>

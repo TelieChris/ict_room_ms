@@ -35,7 +35,7 @@ if ($q !== '') {
 
 $sql = "
   SELECT 
-    m.id as maintenance_id, m.issue_description, m.reported_date, 
+    m.id as maintenance_id, m.issue_description, m.reported_date, m.resolved_date,
     m.action_taken, m.technician_name, m.cost, m.status as log_status,
     a.asset_code, a.asset_name,
     c.name AS category_name
@@ -130,7 +130,14 @@ layout_header('Maintenance Report', 'reports');
           <?php endif; ?>
           <?php foreach ($logs as $log): ?>
             <tr>
-              <td class="small fw-semibold"><?php echo htmlspecialchars($log['reported_date']); ?></td>
+              <td class="small">
+                <div class="fw-semibold"><?php echo htmlspecialchars($log['reported_date']); ?></div>
+                <?php if ($log['log_status'] === 'Resolved' && !empty($log['resolved_date'])): ?>
+                  <div class="text-success x-small mt-1" style="font-size: 0.7rem;">
+                    <i class="bi bi-check-circle"></i> Resolved: <?php echo htmlspecialchars($log['resolved_date']); ?>
+                  </div>
+                <?php endif; ?>
+              </td>
               <td>
                 <div class="fw-bold text-danger"><?php echo htmlspecialchars($log['asset_code']); ?></div>
                 <div class="small text-secondary"><?php echo htmlspecialchars($log['asset_name']); ?></div>

@@ -31,6 +31,7 @@ $sql = "
         SUM(CASE WHEN a.status = 'In Use' THEN 1 ELSE 0 END) as count_in_use,
         SUM(CASE WHEN a.status = 'Maintenance' THEN 1 ELSE 0 END) as count_maintenance,
         SUM(CASE WHEN a.status = 'Lost' THEN 1 ELSE 0 END) as count_lost,
+        SUM(CASE WHEN a.status = 'Faulty' THEN 1 ELSE 0 END) as count_faulty,
         
         -- Power Adapter Stats
         SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Working' THEN 1 ELSE 0 END) as pwr_working,
@@ -59,6 +60,7 @@ $totals = [
     'in_use' => 0,
     'maintenance' => 0,
     'lost' => 0,
+    'faulty' => 0,
     'pwr_working' => 0,
     'pwr_damaged' => 0,
     'pwr_missing' => 0,
@@ -74,6 +76,7 @@ foreach ($summary as $row) {
         $totals['in_use'] += $row['count_in_use'];
         $totals['maintenance'] += $row['count_maintenance'];
         $totals['lost'] += $row['count_lost'];
+        $totals['faulty'] += $row['count_faulty'];
         $totals['pwr_working'] += $row['pwr_working'];
         $totals['pwr_damaged'] += $row['pwr_damaged'];
         $totals['pwr_missing'] += $row['pwr_missing'];
@@ -173,8 +176,8 @@ $generatedAt = date('Y-m-d H:i');
       </div>
       <div class="col-3">
         <div class="stat-box">
-          <div class="stat-label">Missing/Lost</div>
-          <div class="stat-value" style="color: #991b1b;"><?php echo number_format($totals['lost']); ?></div>
+          <div class="stat-label">Missing/Lost/Faulty</div>
+          <div class="stat-value" style="color: #991b1b;"><?php echo number_format($totals['lost'] + $totals['faulty']); ?></div>
         </div>
       </div>
     </div>
@@ -202,7 +205,8 @@ $generatedAt = date('Y-m-d H:i');
                 Avail: <strong><?php echo $row['count_available']; ?></strong> | 
                 Use: <strong><?php echo $row['count_in_use']; ?></strong> | 
                 Maint: <strong><?php echo $row['count_maintenance']; ?></strong> | 
-                Lost: <strong><?php echo $row['count_lost']; ?></strong>
+                Lost: <strong><?php echo $row['count_lost']; ?></strong> | 
+                Flt: <strong><?php echo $row['count_faulty']; ?></strong>
               </td>
               <td class="text-center small">
                 Ok: <strong><?php echo $row['pwr_working']; ?></strong> | 

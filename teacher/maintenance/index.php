@@ -113,8 +113,21 @@ layout_header('Maintenance', 'maintenance');
                 <div class="small text-secondary"><?php echo htmlspecialchars($m['category_name']); ?> • <?php echo htmlspecialchars($m['location_name']); ?></div>
               </td>
               <td>
-                <div class="small text-secondary">Reported: <?php echo htmlspecialchars($m['reported_date']); ?></div>
-                <div><?php echo nl2br(htmlspecialchars($m['issue_description'])); ?></div>
+                <div class="small text-secondary mb-1">Reported: <?php echo htmlspecialchars($m['reported_date']); ?></div>
+                <div class="mb-2"><?php echo nl2br(htmlspecialchars($m['issue_description'])); ?></div>
+                <?php if ($m['status'] === 'Resolved' && !empty($m['action_taken'])): ?>
+                  <div class="mt-2 pt-2 border-top small">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-semibold text-success"><i class="bi bi-check-circle-fill me-1"></i>Resolution:</span>
+                      <?php if (!empty($m['resolved_date'])): ?>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2" style="font-size: 0.65rem;">
+                          Fixed on <?php echo htmlspecialchars($m['resolved_date']); ?>
+                        </span>
+                      <?php endif; ?>
+                    </div>
+                    <div class="text-secondary"><?php echo nl2br(htmlspecialchars($m['action_taken'])); ?></div>
+                  </div>
+                <?php endif; ?>
               </td>
               <td>
                 <?php

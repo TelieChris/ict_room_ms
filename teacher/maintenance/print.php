@@ -122,7 +122,14 @@ $generatedAt = date('Y-m-d H:i');
               <td class="small"><?php echo htmlspecialchars($m['reported_date']); ?></td>
               <td class="small"><?php echo nl2br(htmlspecialchars($m['issue_description'])); ?></td>
               <td class="small"><?php echo htmlspecialchars($m['status']); ?></td>
-              <td class="small"><?php echo nl2br(htmlspecialchars($m['action_taken'] ?: '-')); ?></td>
+              <td class="small">
+                <?php if (!empty($m['action_taken'])): ?>
+                  <div class="fw-bold text-success mb-1">Resolved: <?php echo htmlspecialchars($m['resolved_date'] ?: ''); ?></div>
+                  <?php echo nl2br(htmlspecialchars($m['action_taken'])); ?>
+                <?php else: ?>
+                  -
+                <?php endif; ?>
+              </td>
               <td class="small"><?php echo htmlspecialchars($m['technician_name'] ?: '-'); ?></td>
               <td class="small text-end"><?php echo ($m['cost'] === null) ? '-' : htmlspecialchars(number_format((float)$m['cost'], 2)); ?></td>
             </tr>
