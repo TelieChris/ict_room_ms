@@ -41,7 +41,7 @@ if ($q !== '') {
   $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR a.serial_number LIKE :q)";
   $params[':q'] = '%' . $q . '%';
 }
-$where[] = "c.type = 'Electronic'";
+$where[] = "c.type = 'Non-Electronic'";
 
 $sql = "
   SELECT
@@ -51,7 +51,7 @@ $sql = "
     a.display_cable, a.display_cable_type, a.display_cable_status,
     a.qty_available, a.qty_in_use, a.qty_maintenance, a.qty_faulty, a.qty_lost,
     a.status, a.notes,
-    c.name AS category_name, c.type,
+    c.name AS category_name,
     l.name AS location_name
   FROM assets a
   JOIN asset_categories c ON c.id = a.category_id
@@ -64,7 +64,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $assets = $stmt->fetchAll();
 
-$stmt_cat = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id = ? AND type = 'Electronic' ORDER BY name");
+$stmt_cat = $pdo->prepare("SELECT id, name FROM asset_categories WHERE school_id = ? AND type = 'Non-Electronic' ORDER BY name");
 $stmt_cat->execute([$sid]);
 $categories = $stmt_cat->fetchAll();
 
@@ -84,7 +84,7 @@ if (is_super_admin()) {
     $reportIdentity = $stmt_header_loc->fetchColumn() ?: 'ICT Lab Report';
 }
 
-$fullTitle = $reportIdentity . ' - ICT Equipment Inventory';
+$fullTitle = $reportIdentity . ' - Non-Electronic Assets';
 layout_header($fullTitle, 'reports');
 ?>
 
@@ -92,14 +92,14 @@ layout_header($fullTitle, 'reports');
   <div>
     <div class="d-flex align-items-center gap-2 mb-1">
       <a href="<?php echo htmlspecialchars(url('/reports/index.php')); ?>" class="btn btn-sm btn-light border text-secondary"><i class="bi bi-arrow-left"></i> Back</a>
-      <h1 class="h4 mb-0 text-primary fw-bold"><?php echo htmlspecialchars($reportIdentity); ?> <span class="text-secondary fw-normal">- ICT Equipment Inventory</span></h1>
+      <h1 class="h4 mb-0 text-primary fw-bold"><?php echo htmlspecialchars($reportIdentity); ?> <span class="text-secondary fw-normal">- Non-Electronic Assets</span></h1>
     </div>
-    <div class="text-secondary">Detailed view of all physical hardware.</div>
+    <div class="text-secondary">Inventory of furniture and other non-electronic items.</div>
   </div>
   <div class="d-flex gap-2">
     <?php
       $qs = $_GET;
-      $printUrl = url('/reports/print_inventory.php') . (empty($qs) ? '' : ('?' . http_build_query($qs)));
+      $printUrl = url('/reports/print_non_electronic.php') . (empty($qs) ? '' : ('?' . http_build_query($qs)));
     ?>
     <a class="btn btn-outline-secondary" target="_blank" href="<?php echo htmlspecialchars($printUrl); ?>">
       <i class="bi bi-printer me-1"></i> Print / PDF
@@ -184,18 +184,16 @@ layout_header($fullTitle, 'reports');
             <th>Code</th>
             <th>Asset</th>
             <th>Category</th>
-            <th>Adapter/Cables</th>
+            <th>Qty</th>
             <th>Condition</th>
             <th>Status</th>
             <th>Location</th>
-            <th>Serial</th>
-            <th>Purchase</th>
             <th>Notes</th>
           </tr>
         </thead>
         <tbody>
           <?php if (!$assets): ?>
-            <tr><td colspan="10" class="text-center text-secondary py-5">No assets match your filters.</td></tr>
+            <tr><td colspan="8" class="text-center text-secondary py-5">No assets match your filters.</td></tr>
           <?php endif; ?>
           <?php foreach ($assets as $a): ?>
             <tr>
@@ -205,43 +203,38 @@ layout_header($fullTitle, 'reports');
                 <div class="small text-secondary"><?php echo htmlspecialchars(trim(($a['brand'] ?? '') . ' ' . ($a['model'] ?? ''))); ?></div>
               </td>
               <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"><?php echo htmlspecialchars($a['category_name']); ?></span></td>
-
-              <td class="small">
-                <?php
-                  $nonElec = ($a['type'] ?? '') === 'Non-Electronic';
-                ?>
-                <?php if (!$nonElec && $a['power_adapter'] === 'Yes'): ?>
-                  <div class="text-success small"><i class="bi bi-plug"></i> Power Adapter: <?php echo htmlspecialchars($a['power_adapter_status']); ?></div>
-                <?php endif; ?>
-                <?php if (!$nonElec && $a['display_cable'] === 'Yes'): ?>
-                  <?php
-                    $catName = strtolower($a['category_name']);
-                    $cableLabel = (strpos($catName, 'printer') !== false) ? 'Printing Cable' : 'Display Cable';
-                  ?>
-                  <div class="text-info small"><i class="bi bi-hdmi"></i> <?php echo $cableLabel; ?>: <?php echo htmlspecialchars($a['display_cable_status']); ?> (<?php echo htmlspecialchars($a['display_cable_type']); ?>)</div>
-                <?php endif; ?>
-                <?php if ($nonElec || ($a['power_adapter'] !== 'Yes' && $a['display_cable'] !== 'Yes')): ?>
-                  <span class="text-secondary">-</span>
+              <td class="text-center">
+                <?php $qty = (int)($a['quantity'] ?? 1); ?>
+                <?php if ($qty > 1): ?>
+                  <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle fw-bold"><?php echo $qty; ?></span>
+                <?php else: ?>
+                  <span class="text-secondary small">1</span>
                 <?php endif; ?>
               </td>
               <td><?php echo htmlspecialchars($a['asset_condition']); ?></td>
               <td>
                 <?php
-                  $statusColor = 'secondary';
-                  if ($a['status'] === 'Available') $statusColor = 'success';
-                  elseif ($a['status'] === 'In Use') $statusColor = 'warning';
-                  elseif ($a['status'] === 'Maintenance') $statusColor = 'danger';
-                  elseif ($a['status'] === 'Faulty') $statusColor = 'dark';
-                  elseif ($a['status'] === 'Lost') $statusColor = 'secondary';
-                ?>
-                <span class="badge bg-<?php echo $statusColor; ?> bg-opacity-10 text-<?php echo $statusColor; ?> border border-<?php echo $statusColor; ?>-subtle">
-                  <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem; vertical-align: middle;"></i>
-                  <?php echo htmlspecialchars($a['status']); ?>
-                </span>
+                if ($a['qty_available'] > 0 || $a['qty_in_use'] > 0 || $a['qty_maintenance'] > 0 || $a['qty_faulty'] > 0 || $a['qty_lost'] > 0) {
+                  echo '<div class="d-flex flex-wrap gap-1">';
+                  if ($a['qty_available'] > 0) echo '<span class="badge bg-success bg-opacity-10 text-success border border-success-subtle x-small" style="font-size:0.65rem;">Work: '.$a['qty_available'].'</span> ';
+                  if ($a['qty_in_use'] > 0) echo '<span class="badge bg-info bg-opacity-10 text-info border border-info-subtle x-small" style="font-size:0.65rem;">Use: '.$a['qty_in_use'].'</span> ';
+                  if ($a['qty_maintenance'] > 0) echo '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle x-small" style="font-size:0.65rem;">Maint: '.$a['qty_maintenance'].'</span> ';
+                  if ($a['qty_faulty'] > 0) echo '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle x-small" style="font-size:0.65rem;">Dmg: '.$a['qty_faulty'].'</span> ';
+                  if ($a['qty_lost'] > 0) echo '<span class="badge bg-dark bg-opacity-10 text-dark border border-dark-subtle x-small" style="font-size:0.65rem;">Lost: '.$a['qty_lost'].'</span> ';
+                  echo '</div>';
+                } else {
+                  $sColor = 'secondary';
+                  if ($a['status'] === 'Available') $sColor = 'success';
+                  elseif ($a['status'] === 'In Use') $sColor = 'info';
+                  elseif ($a['status'] === 'Maintenance') $sColor = 'warning';
+                  elseif ($a['status'] === 'Faulty') $sColor = 'danger';
+                  ?>
+                  <span class="badge bg-<?php echo $sColor; ?> bg-opacity-10 text-<?php echo $sColor; ?> border border-<?php echo $sColor; ?>-subtle">
+                    <?php echo htmlspecialchars($a['status']); ?>
+                  </span>
+                <?php } ?>
               </td>
               <td class="small"><?php echo htmlspecialchars($a['location_name']); ?></td>
-              <td class="small text-secondary font-monospace"><?php echo htmlspecialchars($a['serial_number'] ?: '-'); ?></td>
-              <td class="small text-secondary"><?php echo htmlspecialchars($a['purchase_date'] ?: '-'); ?></td>
               <td class="small text-secondary text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($a['notes'] ?: ''); ?>">
                 <?php echo htmlspecialchars($a['notes'] ?: '-'); ?>
               </td>

@@ -63,17 +63,27 @@ $stmt_types = $pdo->prepare("SELECT DISTINCT assigned_to_type FROM asset_assignm
 $stmt_types->execute([$sid]);
 $assigneeTypes = $stmt_types->fetchAll(PDO::FETCH_COLUMN);
 
-// audit report view
-audit_log('REPORT_VIEW', 'asset_assignments', null, 'Viewed assignments report');
+// Role-based report title logic
+$reportIdentity = 'Asset Inventory';
+if (is_super_admin()) {
+    $reportIdentity = 'The system report';
+} elseif (is_head_teacher()) {
+    $reportIdentity = $_SESSION['user']['school_name'] ?? 'School Report';
+} elseif (is_it_technician() && !empty($_SESSION['user']['location_id'])) {
+    $stmt_header_loc = $pdo->prepare("SELECT name FROM locations WHERE id = ?");
+    $stmt_header_loc->execute([$_SESSION['user']['location_id']]);
+    $reportIdentity = $stmt_header_loc->fetchColumn() ?: 'ICT Lab Report';
+}
 
-layout_header('Assignments Report', 'reports');
+$fullTitle = $reportIdentity . ' - Asset Assignments';
+layout_header($fullTitle, 'reports');
 ?>
 
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
   <div>
     <div class="d-flex align-items-center gap-2 mb-1">
       <a href="<?php echo htmlspecialchars(url('/reports/index.php')); ?>" class="btn btn-sm btn-light border text-secondary"><i class="bi bi-arrow-left"></i> Back</a>
-      <h1 class="h4 mb-0 text-success fw-bold">Asset Assignments Report</h1>
+      <h1 class="h4 mb-0 text-success fw-bold"><?php echo htmlspecialchars($reportIdentity); ?> <span class="text-secondary fw-normal">- Asset Assignments</span></h1>
     </div>
     <div class="text-secondary">Track asset allocation to staff and departments.</div>
   </div>
@@ -87,6 +97,8 @@ layout_header('Assignments Report', 'reports');
     </a>
   </div>
 </div>
+
+
 
 <div class="card table-card mb-3">
   <div class="card-body">

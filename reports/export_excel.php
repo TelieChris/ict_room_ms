@@ -21,6 +21,7 @@ if ($category > 0) { $where[] = "a.category_id = :category"; $params[':category'
 if ($location > 0) { $where[] = "a.location_id = :location"; $params[':location'] = $location; }
 if ($status !== '') { $where[] = "a.status = :status"; $params[':status'] = $status; }
 if ($q !== '') { $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR a.serial_number LIKE :q)"; $params[':q'] = '%' . $q . '%'; }
+$where[] = "c.name NOT IN ('Chair','Desk','Multisocket','Projection Screen','Whiteboard','Other Furniture','Furniture','Curtain','Cabinet','Fire Extinguisher','Fan','Air Conditioner')";
 
 $sql = "
   SELECT

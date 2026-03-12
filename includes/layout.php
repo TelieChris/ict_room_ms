@@ -25,6 +25,7 @@ function layout_header(string $title, string $active = ''): void
     ['label' => 'Users',        'icon' => 'bi-people',            'href' => url('/admin/users/index.php'),             'key' => 'users',       'roles' => ['super_admin']],
     ['label' => 'Schools',      'icon' => 'bi-building',          'href' => url('/admin/schools/index.php'),           'key' => 'schools',     'roles' => ['super_admin']],
     ['label' => 'ICT Labs',     'icon' => 'bi-router',            'href' => url('/admin/locations/index.php'),         'key' => 'locations',   'roles' => ['super_admin']],
+    ['label' => 'Asset Categories', 'icon' => 'bi-tags',          'href' => url('/admin/categories/index.php'),        'key' => 'categories',  'roles' => ['super_admin']],
   ];
 
   ?>
@@ -118,7 +119,84 @@ function layout_footer(): void
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="<?php echo htmlspecialchars(url('/assets/js/app.js')); ?>"></script>
+    <script>
+      /**
+       * Generates and downloads a PDF from a DOM element.
+       * @param {string} elementId - The ID of the element to capture.
+       * @param {string} filename - The name of the downloaded file.
+       * @param {string} orientation - 'portrait' or 'landscape'.
+       */
+      function downloadPDF(elementId, filename, orientation = 'landscape') {
+        const element = document.getElementById(elementId);
+        if (!element) {
+          console.error('Element not found:', elementId);
+          return;
+        }
+
+        // Add class to trigger PDF-only styles
+        document.body.classList.add('is-generating-pdf');
+        element.classList.add('pdf-content');
+
+        const opt = {
+          margin:       [0.5, 0.5],
+          filename:     filename + '.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            letterRendering: true,
+            logging: false,
+            scrollY: 0
+          },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: orientation }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+          document.body.classList.remove('is-generating-pdf');
+          element.classList.remove('pdf-content');
+        });
+      }
+    </script>
+    <style>
+      /* High-fidelity PDF Header (hidden on screen) */
+      .pdf-only { display: none; }
+      
+      .is-generating-pdf .pdf-only {
+        display: block !important;
+      }
+      
+      .is-generating-pdf .pdf-content {
+        padding: 10px !important;
+        background: white !important;
+      }
+      
+      /* Professional PDF Letterhead styling */
+      .pdf-letterhead {
+        border-bottom: 2px solid #4f46e5;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+      }
+      .pdf-school-name {
+        font-size: 22px;
+        font-weight: 800;
+        color: #4f46e5;
+        margin-bottom: 5px;
+      }
+      .pdf-report-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      
+      /* Hide elements inside report-container during PDF capture */
+      .is-generating-pdf .no-pdf {
+        display: none !important;
+      }
+    </style>
   </body>
   </html>
   <?php

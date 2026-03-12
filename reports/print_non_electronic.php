@@ -9,13 +9,14 @@ require_login();
 
 $pdo = db();
 
-$assigneeType = trim($_GET['assignee_type'] ?? '');
-$status = trim($_GET['status'] ?? 'Active');
+$category = (int)($_GET['category'] ?? 0);
+$status = trim($_GET['status'] ?? '');
+$location = (int)($_GET['location'] ?? 0);
 $q = trim($_GET['q'] ?? '');
 
 $sid = (int)$_SESSION['user']['school_id'];
 $assigned_lid = $_SESSION['user']['location_id'] ?? null;
-$where = ["ast.school_id = :sid"];
+$where = ["a.school_id = :sid"];
 $params = [':sid' => $sid];
 
 if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
@@ -23,30 +24,34 @@ if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
     $params[':assigned_lid'] = $assigned_lid;
 }
 
-if ($assigneeType !== '') { $where[] = "ast.assigned_to_type = :atype"; $params[':atype'] = $assigneeType; }
-if ($status === 'Active') { $where[] = "ast.returned_date IS NULL"; } 
-elseif ($status === 'Returned') { $where[] = "ast.returned_date IS NOT NULL"; }
-if ($q !== '') { $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR ast.assigned_to_name LIKE :q)"; $params[':q'] = '%' . $q . '%'; }
+if ($category > 0) { $where[] = "a.category_id = :category"; $params[':category'] = $category; }
+if ($location > 0) { $where[] = "a.location_id = :location"; $params[':location'] = $location; }
+if ($status !== '') { $where[] = "a.status = :status"; $params[':status'] = $status; }
+if ($q !== '') { $where[] = "(a.asset_code LIKE :q OR a.asset_name LIKE :q OR a.serial_number LIKE :q)"; $params[':q'] = '%' . $q . '%'; }
+$where[] = "c.type = 'Non-Electronic'";
 
 $sql = "
-  SELECT 
-    ast.id as assignment_id, ast.assigned_to_type, ast.assigned_to_name, 
-    ast.assigned_date, ast.expected_return_date, ast.returned_date,
-    ast.return_adapter_status, ast.return_display_cable_status, ast.return_notes, ast.notes as assignment_notes,
-    a.asset_code, a.asset_name,
-    c.name AS category_name
-  FROM asset_assignments ast
-  JOIN assets a ON a.id = ast.asset_id
+  SELECT
+    a.asset_code, a.asset_name, a.brand, a.model, a.serial_number,
+    a.purchase_date, a.asset_condition, a.quantity,
+    a.power_adapter, a.power_adapter_status,
+    a.display_cable, a.display_cable_type, a.display_cable_status,
+    a.qty_available, a.qty_in_use, a.qty_maintenance, a.qty_faulty, a.qty_lost,
+    a.status, a.notes,
+    c.name AS category_name,
+    l.name AS location_name
+  FROM assets a
   JOIN asset_categories c ON c.id = a.category_id
+  JOIN locations l ON l.id = a.location_id
 ";
 if ($where) $sql .= " WHERE " . implode(" AND ", $where);
-$sql .= " ORDER BY ast.assigned_date DESC, ast.assigned_to_name LIMIT 2000";
+$sql .= " ORDER BY c.name, a.asset_name, a.asset_code LIMIT 2000";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-$assignments = $stmt->fetchAll();
+$assets = $stmt->fetchAll();
 
-audit_log('REPORT_PRINT', 'asset_assignments', null, 'Printed assignments report');
+audit_log('REPORT_PRINT', 'assets', null, 'Printed non-electronic report');
 
 // Role-based title logic
 $reportIdentity = 'Asset Inventory';
@@ -64,7 +69,7 @@ if (is_super_admin()) {
     $reportIdentity = $stmt_print_loc->fetchColumn() ?: 'ICT Lab Report';
 }
 
-$title = $reportIdentity . ' - Asset Assignments';
+$title = $reportIdentity . ' - Non-Electronic Assets';
 $generatedAt = date('Y-m-d H:i');
 ?>
 <!doctype html>
@@ -81,8 +86,21 @@ $generatedAt = date('Y-m-d H:i');
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <style>
-    body { font-family: 'Outfit', sans-serif; background: #f8fafc; color: #0f172a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .print-container { background: white; max-width: 1200px; margin: 2rem auto; padding: 3rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-container {
+      background: white;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
     @media print {
       @page { size: A4 landscape; margin: 10mm; }
       body { background: white !important; }
@@ -98,14 +116,16 @@ $generatedAt = date('Y-m-d H:i');
     tr { page-break-inside: avoid; page-break-after: auto; }
     thead { display: table-header-group; }
     tfoot { display: table-footer-group; }
-    .brand-title { font-size: 1.75rem; font-weight: 800; color: #16a34a; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
+    .brand-title { font-size: 1.75rem; font-weight: 800; color: #4f46e5; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
     .brand-subtitle { color: #64748b; font-weight: 500; font-size: 0.95rem; }
     .table th { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: #475569; background: #f8fafc; border-bottom-width: 2px; }
     .table td, .table th { border: 1px solid #e2e8f0 !important; }
     .status-badge { display: inline-block; padding: 0.25em 0.6em; font-size: 0.75rem; font-weight: 600; line-height: 1; text-align: center; border-radius: 4px; }
-    .status-Active { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .status-Overdue { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .status-Returned { background-color: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    .status-Available { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-In-Use { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+    .status-Maintenance { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-Lost { background-color: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    .status-Faulty { background-color: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; }
   </style>
 </head>
 <body>
@@ -119,12 +139,19 @@ $generatedAt = date('Y-m-d H:i');
       <div class="col-4 text-end">
         <div class="no-print mb-3">
           <button class="btn btn-sm btn-primary px-3 shadow-sm" onclick="window.print()">Print Report</button>
-          <button class="btn btn-sm btn-success px-3 shadow-sm ms-2" onclick="downloadPDF('print-content', 'assignments_report', 'landscape')">Download PDF</button>
-          <a class="btn btn-sm btn-outline-secondary px-3 ms-2" href="<?php echo htmlspecialchars(url('/reports/assignments.php') . (!empty($_GET) ? ('?' . http_build_query($_GET)) : '')); ?>">Close</a>
+          <button class="btn btn-sm btn-success px-3 shadow-sm ms-2" onclick="downloadPDF('print-content', 'non_electronic_report', 'landscape')">Download PDF</button>
+          <a class="btn btn-sm btn-outline-secondary px-3 ms-2" href="<?php echo htmlspecialchars(url('/reports/non_electronic.php') . (!empty($_GET) ? ('?' . http_build_query($_GET)) : '')); ?>">Close</a>
         </div>
         <div class="small text-secondary">
           <strong>Date Generated:</strong> <?php echo htmlspecialchars($generatedAt); ?><br>
-          <strong>Total Records:</strong> <?php echo count($assignments); ?>
+          <strong>Total Items:</strong> <?php 
+            $totalCount = 0;
+            foreach ($assets as $a) {
+                $breakdownSum = (int)($a['qty_available'] + $a['qty_in_use'] + $a['qty_maintenance'] + $a['qty_faulty'] + $a['qty_lost']);
+                $totalCount += ($breakdownSum > 0) ? $breakdownSum : (int)($a['quantity'] ?? 1);
+            }
+            echo $totalCount;
+          ?>
         </div>
       </div>
     </div>
@@ -133,53 +160,49 @@ $generatedAt = date('Y-m-d H:i');
       <table class="table table-bordered table-sm align-middle">
         <thead>
           <tr>
-            <th style="width:110px;">Asset Code</th>
-            <th>Asset Details</th>
-            <th style="width:160px;">Assigned To</th>
-            <th style="width:130px;">Type</th>
-            <th style="width:110px;">Assigned Date</th>
-            <th style="width:110px;">Expected Return</th>
-            <th style="width:110px;">Returned Date</th>
-            <th>Return Condition</th>
+            <th style="width:100px;">Code</th>
+            <th>Asset Information</th>
+            <th style="width:130px;">Category</th>
+            <th style="width:55px;">Qty</th>
+            <th style="width:90px;">Condition</th>
             <th style="width:100px;">Status</th>
+            <th style="width:120px;">Location</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
-          <?php if (!$assignments): ?>
-            <tr><td colspan="8" class="text-center text-secondary py-5">No assignment records match the selected criteria.</td></tr>
+          <?php if (!$assets): ?>
+            <tr><td colspan="8" class="text-center text-secondary py-5">No assets match the selected criteria.</td></tr>
           <?php endif; ?>
-          <?php foreach ($assignments as $ast): ?>
-            <?php 
-              $isReturned = !empty($ast['returned_date']);
-              $isOverdue = !$isReturned && $ast['expected_return_date'] && strtotime($ast['expected_return_date']) < time(); 
-              $statusClass = $isReturned ? 'status-Returned' : ($isOverdue ? 'status-Overdue' : 'status-Active');
-              $statusText = $isReturned ? 'Returned' : ($isOverdue ? 'Overdue' : 'Active');
-            ?>
+          <?php foreach ($assets as $a): ?>
+            <?php $statusClass = 'status-' . str_replace(' ', '-', $a['status']); ?>
             <tr>
-              <td class="fw-bold text-success"><?php echo htmlspecialchars($ast['asset_code']); ?></td>
+              <td class="fw-bold text-primary"><?php echo htmlspecialchars($a['asset_code']); ?></td>
               <td>
-                <div class="fw-semibold"><?php echo htmlspecialchars($ast['asset_name']); ?></div>
-                <div class="small text-secondary"><?php echo htmlspecialchars($ast['category_name']); ?></div>
+                <div class="fw-bold"><?php echo htmlspecialchars($a['asset_name']); ?></div>
+                <div class="small text-secondary"><?php echo htmlspecialchars(trim(($a['brand'] ?? '') . ' ' . ($a['model'] ?? ''))); ?></div>
               </td>
-              <td class="fw-semibold text-dark"><?php echo htmlspecialchars($ast['assigned_to_name']); ?></td>
-              <td class="small text-secondary"><?php echo htmlspecialchars($ast['assigned_to_type']); ?></td>
-              <td class="small"><?php echo htmlspecialchars($ast['assigned_date']); ?></td>
-              <td class="small text-secondary"><?php echo htmlspecialchars($ast['expected_return_date'] ?: '-'); ?></td>
-              <td class="small"><?php echo htmlspecialchars($ast['returned_date'] ?: '-'); ?></td>
-              <td class="small" style="font-size: 0.65rem;">
-                <?php if ($ast['returned_date']): ?>
-                  <?php if ($ast['return_adapter_status'] && $ast['return_adapter_status'] !== 'N/A'): ?>
-                    <div class="text-success fw-bold">Pwr: <?php echo htmlspecialchars($ast['return_adapter_status']); ?></div>
-                  <?php endif; ?>
-                  <?php if ($ast['return_display_cable_status'] && $ast['return_display_cable_status'] !== 'N/A'): ?>
-                    <div class="text-info fw-bold">Cable: <?php echo htmlspecialchars($ast['return_display_cable_status']); ?></div>
-                  <?php endif; ?>
-                  <div class="text-secondary mt-1" style="font-style: italic;"><?php echo htmlspecialchars($ast['return_notes'] ?: '-'); ?></div>
-                <?php else: ?>
-                  <span class="text-secondary">-</span>
-                <?php endif; ?>
+              <td class="small fw-semibold text-secondary"><?php echo htmlspecialchars($a['category_name']); ?></td>
+              <td class="text-center small">
+                <?php $qty = (int)($a['quantity'] ?? 1); echo $qty > 1 ? '<strong>' . $qty . '</strong>' : '1'; ?>
               </td>
-              <td><span class="status-badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span></td>
+              <td class="small"><?php echo htmlspecialchars($a['asset_condition']); ?></td>
+              <td>
+                <?php
+                if ($a['qty_available'] > 0 || $a['qty_in_use'] > 0 || $a['qty_maintenance'] > 0 || $a['qty_faulty'] > 0 || $a['qty_lost'] > 0) {
+                  echo '<div style="font-size: 0.65rem; line-height: 1.2;">';
+                  if ($a['qty_available'] > 0) echo '<div>Working: '.$a['qty_available'].'</div>';
+                  if ($a['qty_in_use'] > 0) echo '<div>In Use: '.$a['qty_in_use'].'</div>';
+                  if ($a['qty_maintenance'] > 0) echo '<div>Maint: '.$a['qty_maintenance'].'</div>';
+                  if ($a['qty_faulty'] > 0) echo '<div>Damaged: '.$a['qty_faulty'].'</div>';
+                  if ($a['qty_lost'] > 0) echo '<div>Lost: '.$a['qty_lost'].'</div>';
+                  echo '</div>';
+                } else { ?>
+                  <span class="status-badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($a['status']); ?></span>
+                <?php } ?>
+              </td>
+              <td class="small"><?php echo htmlspecialchars($a['location_name']); ?></td>
+              <td class="small text-secondary"><?php echo htmlspecialchars($a['notes'] ?: '-'); ?></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

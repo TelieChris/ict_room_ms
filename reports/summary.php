@@ -26,22 +26,27 @@ if ($assigned_lid && !is_super_admin() && !is_head_teacher()) {
 $sql = "
     SELECT 
         c.name as category_name,
-        COUNT(a.id) as total_assets,
-        SUM(CASE WHEN a.status = 'Available' THEN 1 ELSE 0 END) as count_available,
-        SUM(CASE WHEN a.status = 'In Use' THEN 1 ELSE 0 END) as count_in_use,
-        SUM(CASE WHEN a.status = 'Maintenance' THEN 1 ELSE 0 END) as count_maintenance,
-        SUM(CASE WHEN a.status = 'Lost' THEN 1 ELSE 0 END) as count_lost,
-        SUM(CASE WHEN a.status = 'Faulty' THEN 1 ELSE 0 END) as count_faulty,
+        SUM(CASE 
+            WHEN (a.qty_available + a.qty_in_use + a.qty_maintenance + a.qty_lost + a.qty_faulty) > 0 
+            THEN (a.qty_available + a.qty_in_use + a.qty_maintenance + a.qty_lost + a.qty_faulty) 
+            ELSE a.quantity 
+        END) as total_assets_count,
+        SUM(CASE WHEN a.qty_available > 0 THEN a.qty_available ELSE (CASE WHEN a.status = 'Available' THEN a.quantity ELSE 0 END) END) as count_available,
+        SUM(CASE WHEN a.qty_in_use > 0 THEN a.qty_in_use ELSE (CASE WHEN a.status = 'In Use' THEN a.quantity ELSE 0 END) END) as count_in_use,
+        SUM(CASE WHEN a.qty_maintenance > 0 THEN a.qty_maintenance ELSE (CASE WHEN a.status = 'Maintenance' THEN a.quantity ELSE 0 END) END) as count_maintenance,
+        SUM(CASE WHEN a.qty_lost > 0 THEN a.qty_lost ELSE (CASE WHEN a.status = 'Lost' THEN a.quantity ELSE 0 END) END) as count_lost,
+        SUM(CASE WHEN a.qty_faulty > 0 THEN a.qty_faulty ELSE (CASE WHEN a.status = 'Faulty' THEN a.quantity ELSE 0 END) END) as count_faulty,
         
         -- Power Adapter Stats
-        SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Working' THEN 1 ELSE 0 END) as pwr_working,
-        SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Damaged' THEN 1 ELSE 0 END) as pwr_damaged,
-        SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Missing' THEN 1 ELSE 0 END) as pwr_missing,
+        SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Working' THEN a.quantity ELSE 0 END) as pwr_working,
+        SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Damaged' THEN a.quantity ELSE 0 END) as pwr_damaged,
+        SUM(CASE WHEN a.power_adapter = 'Yes' AND a.power_adapter_status = 'Missing' THEN a.quantity ELSE 0 END) as pwr_missing,
         
         -- Display Cable Stats
-        SUM(CASE WHEN a.display_cable = 'Yes' AND a.display_cable_status = 'Working' THEN 1 ELSE 0 END) as cable_working,
-        SUM(CASE WHEN a.display_cable = 'Yes' AND a.display_cable_status = 'Damaged' THEN 1 ELSE 0 END) as cable_damaged,
-        SUM(CASE WHEN a.display_cable = 'Yes' AND a.display_cable_status = 'Missing' THEN 1 ELSE 0 END) as cable_missing
+        SUM(CASE WHEN a.display_cable = 'Yes' AND a.display_cable_status = 'Working' THEN a.quantity ELSE 0 END) as cable_working,
+        SUM(CASE WHEN a.display_cable = 'Yes' AND a.display_cable_status = 'Damaged' THEN a.quantity ELSE 0 END) as cable_damaged,
+        SUM(CASE WHEN a.display_cable = 'Yes' AND a.display_cable_status = 'Missing' THEN a.quantity ELSE 0 END) as cable_missing,
+        c.type
     FROM asset_categories c
     LEFT JOIN assets a ON a.category_id = c.id AND $where_assets
     WHERE c.school_id = :sid_categories
@@ -70,8 +75,8 @@ $totals = [
 ];
 
 foreach ($summary as $row) {
-    if ($row['total_assets'] > 0) {
-        $totals['assets'] += $row['total_assets'];
+    if ($row['total_assets_count'] > 0) {
+        $totals['assets'] += $row['total_assets_count'];
         $totals['available'] += $row['count_available'];
         $totals['in_use'] += $row['count_in_use'];
         $totals['maintenance'] += $row['count_maintenance'];
@@ -86,12 +91,25 @@ foreach ($summary as $row) {
     }
 }
 
-layout_header('Inventory Summary & Analytics', 'reports');
+// Role-based report title logic
+$reportIdentity = 'Asset Inventory';
+if (is_super_admin()) {
+    $reportIdentity = 'The system report';
+} elseif (is_head_teacher()) {
+    $reportIdentity = $_SESSION['user']['school_name'] ?? 'School Report';
+} elseif (is_it_technician() && !empty($_SESSION['user']['location_id'])) {
+    $stmt_header_loc = $pdo->prepare("SELECT name FROM locations WHERE id = ?");
+    $stmt_header_loc->execute([$_SESSION['user']['location_id']]);
+    $reportIdentity = $stmt_header_loc->fetchColumn() ?: 'ICT Lab Report';
+}
+
+$fullTitle = $reportIdentity . ' - Inventory Summary';
+layout_header($fullTitle, 'reports');
 ?>
 
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
     <div>
-        <h1 class="h3 mb-1 fw-bold text-primary">Inventory Summary</h1>
+        <h1 class="h3 mb-1 fw-bold text-primary"><?php echo htmlspecialchars($reportIdentity); ?> <span class="text-secondary fw-normal">- Inventory Summary</span></h1>
         <div class="text-secondary">High-level overview of assets and hardware health.</div>
     </div>
     <div class="d-flex gap-2">
@@ -103,6 +121,8 @@ layout_header('Inventory Summary & Analytics', 'reports');
         </a>
     </div>
 </div>
+
+
 
 <!-- Grand Totals Cards -->
 <div class="row g-3 mb-4">
@@ -159,16 +179,17 @@ layout_header('Inventory Summary & Analytics', 'reports');
                         </tr>
                     </thead>
                     <tbody class="border-top-0">
-                        <?php foreach ($summary as $row): if ($row['total_assets'] == 0) continue; 
+                        <?php foreach ($summary as $row): if (($row['total_assets_count'] ?? 0) == 0) continue; 
                             $catLow = strtolower($row['category_name']);
-                            $cableName = (strpos($catLow, 'printer') !== false) ? 'Printing' : 'Display';
+                            $isNonElec = ($row['type'] === 'Non-Electronic');
+                            $cableName = (strpos($catLow, 'printer') !== false) || (strpos($catLow, 'scanner') !== false) ? 'USB' : 'Display';
                         ?>
                             <tr>
                                 <td class="ps-4">
                                     <div class="fw-bold"><?php echo htmlspecialchars($row['category_name']); ?></div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 rounded-pill"><?php echo $row['total_assets']; ?></span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 rounded-pill"><?php echo number_format($row['total_assets_count']); ?></span>
                                 </td>
                                 <td class="text-center small">
                                     <div class="d-flex flex-column gap-1 align-items-center">
@@ -184,27 +205,35 @@ layout_header('Inventory Summary & Analytics', 'reports');
                                     </div>
                                 </td>
                                 <td class="text-center small">
-                                    <div class="d-flex flex-column gap-1 align-items-center">
-                                        <span class="text-success" title="Working">Working: <?php echo $row['pwr_working']; ?></span>
-                                        <?php if ($row['pwr_damaged'] > 0 || $row['pwr_missing'] > 0): ?>
-                                            <div class="d-flex gap-2">
-                                                <span class="text-danger" title="Damaged">! <?php echo $row['pwr_damaged']; ?></span>
-                                                <span class="text-dark" title="Missing">? <?php echo $row['pwr_missing']; ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php if (!$isNonElec): ?>
+                                        <div class="d-flex flex-column gap-1 align-items-center">
+                                            <span class="text-success" title="Working">Working: <?php echo $row['pwr_working']; ?></span>
+                                            <?php if ($row['pwr_damaged'] > 0 || $row['pwr_missing'] > 0): ?>
+                                                <div class="d-flex gap-2">
+                                                    <span class="text-danger" title="Damaged">! <?php echo $row['pwr_damaged']; ?></span>
+                                                    <span class="text-dark" title="Missing">? <?php echo $row['pwr_missing']; ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-secondary opacity-50 small">-</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center small">
-                                    <div class="d-flex flex-column gap-1 align-items-center text-truncate">
-                                        <div class="text-secondary mb-1 fw-bold" style="font-size: 0.7rem;"><?php echo $cableName; ?></div>
-                                        <span class="text-success" title="Working">Working: <?php echo $row['cable_working']; ?></span>
-                                        <?php if ($row['cable_damaged'] > 0 || $row['cable_missing'] > 0): ?>
-                                            <div class="d-flex gap-2">
-                                                <span class="text-danger" title="Damaged">! <?php echo $row['cable_damaged']; ?></span>
-                                                <span class="text-dark" title="Missing">? <?php echo $row['cable_missing']; ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php if (!$isNonElec): ?>
+                                        <div class="d-flex flex-column gap-1 align-items-center text-truncate">
+                                            <div class="text-secondary mb-1 fw-bold" style="font-size: 0.7rem;"><?php echo $cableName; ?></div>
+                                            <span class="text-success" title="Working">Working: <?php echo $row['cable_working']; ?></span>
+                                            <?php if ($row['cable_damaged'] > 0 || $row['cable_missing'] > 0): ?>
+                                                <div class="d-flex gap-2">
+                                                    <span class="text-danger" title="Damaged">! <?php echo $row['cable_damaged']; ?></span>
+                                                    <span class="text-dark" title="Missing">? <?php echo $row['cable_missing']; ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-secondary opacity-50 small">-</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

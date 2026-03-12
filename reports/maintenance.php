@@ -50,17 +50,27 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $logs = $stmt->fetchAll();
 
-// audit report view
-audit_log('REPORT_VIEW', 'maintenance_logs', null, 'Viewed maintenance report');
+// Role-based report title logic
+$reportIdentity = 'Asset Inventory';
+if (is_super_admin()) {
+    $reportIdentity = 'The system report';
+} elseif (is_head_teacher()) {
+    $reportIdentity = $_SESSION['user']['school_name'] ?? 'School Report';
+} elseif (is_it_technician() && !empty($_SESSION['user']['location_id'])) {
+    $stmt_header_loc = $pdo->prepare("SELECT name FROM locations WHERE id = ?");
+    $stmt_header_loc->execute([$_SESSION['user']['location_id']]);
+    $reportIdentity = $stmt_header_loc->fetchColumn() ?: 'ICT Lab Report';
+}
 
-layout_header('Maintenance Report', 'reports');
+$fullTitle = $reportIdentity . ' - Maintenance History';
+layout_header($fullTitle, 'reports');
 ?>
 
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
   <div>
     <div class="d-flex align-items-center gap-2 mb-1">
       <a href="<?php echo htmlspecialchars(url('/reports/index.php')); ?>" class="btn btn-sm btn-light border text-secondary"><i class="bi bi-arrow-left"></i> Back</a>
-      <h1 class="h4 mb-0 text-danger fw-bold">Maintenance Logs Report</h1>
+      <h1 class="h4 mb-0 text-danger fw-bold"><?php echo htmlspecialchars($reportIdentity); ?> <span class="text-secondary fw-normal">- Maintenance History</span></h1>
     </div>
     <div class="text-secondary">History of reported issues, repairs, and associated costs.</div>
   </div>
@@ -74,6 +84,8 @@ layout_header('Maintenance Report', 'reports');
     </a>
   </div>
 </div>
+
+
 
 <div class="card table-card mb-3">
   <div class="card-body">

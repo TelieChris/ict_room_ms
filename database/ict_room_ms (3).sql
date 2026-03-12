@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 02, 2026 at 06:34 PM
+-- Generation Time: Mar 12, 2026 at 05:28 PM
 -- Server version: 10.1.29-MariaDB
 -- PHP Version: 7.2.0
 
@@ -39,6 +39,12 @@ CREATE TABLE `assets` (
   `serial_number` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `purchase_date` date DEFAULT NULL,
   `asset_condition` enum('New','Good','Fair','Damaged') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Good',
+  `quantity` int(10) UNSIGNED NOT NULL DEFAULT '1',
+  `qty_available` int(10) UNSIGNED DEFAULT '0',
+  `qty_in_use` int(10) UNSIGNED DEFAULT '0',
+  `qty_maintenance` int(10) UNSIGNED DEFAULT '0',
+  `qty_faulty` int(10) UNSIGNED DEFAULT '0',
+  `qty_lost` int(10) UNSIGNED DEFAULT '0',
   `power_adapter` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
   `power_adapter_status` enum('Working','Damaged','Missing','N/A') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N/A',
   `display_cable` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
@@ -56,100 +62,104 @@ CREATE TABLE `assets` (
 -- Dumping data for table `assets`
 --
 
-INSERT INTO `assets` (`id`, `school_id`, `asset_code`, `asset_name`, `category_id`, `brand`, `model`, `serial_number`, `purchase_date`, `asset_condition`, `power_adapter`, `power_adapter_status`, `display_cable`, `display_cable_type`, `display_cable_status`, `status`, `location_id`, `image_path`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 1, 'REB/MSA-GSRMR/LT038', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2178', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:31:44', '2026-03-02 19:03:05'),
-(2, 1, 'REB/MSA-GSRMR/LT018', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2253', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:46:41', '2026-03-02 19:02:53'),
-(3, 1, 'REB/MSA-GSRMR/LT104', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2270', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:48:22', '2026-03-02 19:02:42'),
-(4, 1, 'REB/MSA-GSRMR/LT002', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2222', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:56:34', '2026-03-02 19:02:30'),
-(5, 1, 'REB/MSA-GSRMR/LT034', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2161', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:01:36', '2026-03-02 19:02:18'),
-(6, 1, 'REB/MSA-GSRMR/LT039', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2237', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:10:39', '2026-03-02 19:02:08'),
-(7, 1, 'REB/MSA-GSRMR/LT046', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2112', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:12:17', '2026-03-02 19:01:56'),
-(8, 1, 'REB/MSA-GSRMR/LT013', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2179', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:13:28', '2026-03-02 19:01:45'),
-(9, 1, 'REB/MSA-GSRMR/LT032', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2250', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:14:10', '2026-03-02 19:01:34'),
-(10, 1, 'REB/MSA-GSRMR/LT017', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2128', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:15:14', '2026-03-02 19:01:23'),
-(11, 1, 'REB/MSA-GSRMR/LT026', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2177', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:21:56', '2026-03-02 19:01:04'),
-(12, 1, 'REB/MSA-GSRMR/LT027', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2183', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:31:09', '2026-03-02 19:00:51'),
-(13, 1, 'REB/MSA-GSRMR/LT028', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2101', NULL, 'Fair', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 10:34:34', '2026-03-02 19:00:39'),
-(15, 1, 'REB/MSA-GSRMR/LT014', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2125', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:54:08', '2026-03-02 19:00:27'),
-(16, 1, 'REB/MSA-GSRMR/LT012', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2164', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:00:11', '2026-03-02 19:00:13'),
-(17, 1, 'REB/MSA-GSRMR/LT024', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2184', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 1, NULL, 'This PC doesn\'t power on.', '2026-01-28 11:01:48', '2026-03-02 19:00:02'),
-(18, 1, 'REB/MSA-GSRMR/LT001', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2223', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:04:26', '2026-03-02 18:59:44'),
-(19, 1, 'REB/MSA-GSRMR/LT011', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2114', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:07:25', '2026-03-02 18:59:30'),
-(20, 1, 'REB/MSA-GSRMR/LT009', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2210', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:10:12', '2026-03-02 18:59:17'),
-(21, 1, 'REB/MSA-GSRMR/LT042', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2240', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:15:48', '2026-03-02 18:59:03'),
-(22, 1, 'REB/MSA-GSRMR/LT098', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '305AAA1306', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:23:30', '2026-03-02 18:58:48'),
-(23, 1, 'REB/MSA-GSRMR/LT004', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2103', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:24:24', '2026-03-02 19:22:14'),
-(24, 1, 'REB/MSA-GSRMR/LT055', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2096', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:40:06', '2026-03-02 19:25:08'),
-(25, 1, 'REB/MSA-GSRMR/LT029', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2175', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:42:08', '2026-03-02 18:58:05'),
-(26, 1, 'REB/MSA-GSRMR/LT033', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2212', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:43:23', '2026-03-02 19:22:54'),
-(27, 1, 'REB/MSA-GSRMR/LT005', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2244', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:57:37', '2026-03-02 19:22:26'),
-(28, 1, 'REB/MSA-GSRMR/LT019', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2192', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:58:34', '2026-02-23 19:10:56'),
-(29, 1, 'REB/MSA-GSRMR/LT015', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2214', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:59:25', '2026-02-23 19:10:56'),
-(30, 1, 'REB/MSA-GSRMR/LT020', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2260', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:00:28', '2026-02-23 19:10:56'),
-(31, 1, 'REB/MSA-GSRMR/LT010', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2236', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:01:47', '2026-02-23 19:10:56'),
-(32, 1, 'REB/MSA-GSRMR/LT036', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2165', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:05:25', '2026-02-23 19:10:56'),
-(33, 1, 'REB/MSA-GSRMR/LT037', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2215', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:06:34', '2026-02-23 19:10:56'),
-(34, 1, 'REB/MSA-GSRMR/LT031', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2120', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:08:17', '2026-02-23 19:10:56'),
-(35, 1, 'REB/MSA-GSRMR/LT030', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2156', NULL, 'Fair', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'Left-click on the touchpad does not work.', '2026-01-28 14:09:03', '2026-02-23 19:10:56'),
-(36, 1, 'REB/MSA-GSRMR/LT035', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2205', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:10:06', '2026-02-23 19:10:56'),
-(37, 1, 'REB/MSA-GSRMR/LT044', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2146', NULL, 'Fair', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:30:21', '2026-02-23 19:10:56'),
-(38, 1, 'REB/MSA-GSRMR/LT016', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2248', NULL, 'Fair', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:33:00', '2026-02-23 19:10:56'),
-(39, 1, 'REB/MSA-GSRMR/LT043', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2167', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:33:59', '2026-02-23 19:10:56'),
-(40, 1, 'REB/MSA-GSRMR/LT040', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2217', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:35:14', '2026-02-23 19:10:56'),
-(42, 1, 'REB/MSA-GSRMR/LT041', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2066', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:37:11', '2026-02-23 19:10:56'),
-(43, 1, 'REB/MSA-GSRMR/LT003', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA1954', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:51:37', '2026-02-23 19:10:56'),
-(44, 1, 'REB/MSA-GSRMR/LT025', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2207', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:53:25', '2026-02-23 19:10:56'),
-(45, 1, 'REB/MSA-GSRMR/LT021', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2242', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:54:16', '2026-02-23 19:10:56'),
-(46, 1, 'REB/MSA-GSRMR/LT103', 'POSITIVO Laptop', 2, 'POSITIVO', '14CLE-I', '156AAC06353', NULL, 'Fair', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 15:45:14', '2026-02-23 19:10:56'),
-(47, 1, 'REB/MSA-GSRMR/PRJ002', 'Optoma Projector', 6, 'POSITIVO', 'DASSLU', 'Q7BU915AAAAAC0357', NULL, 'Good', 'Yes', 'Working', 'Yes', 'HDMI', 'Working', 'Available', 1, NULL, NULL, '2026-01-28 15:49:19', '2026-03-02 18:51:38'),
-(48, 1, 'REB/MSA-GSRMR/PRJ01', 'BENQ Projector', 6, 'BENQ', 'M5560', 'PD9BN04142000', NULL, 'Good', 'Yes', 'Working', 'Yes', 'VGA', 'Working', 'Available', 1, NULL, NULL, '2026-01-28 16:05:28', '2026-03-02 18:50:59'),
-(49, 1, 'REB/MSA-GSRMR/LT007', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2121', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 16:53:37', '2026-02-23 19:10:56'),
-(50, 1, 'REB/MSA-GSRMR/LT045', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2221', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, NULL, '2026-02-20 14:27:24', '2026-02-23 19:10:56'),
-(51, 1, 'REB/MSA-GSRMR/LT023', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2083', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, NULL, '2026-02-20 14:37:59', '2026-02-23 19:10:56'),
-(52, 1, 'REB/MSA-GSRMR/LT100', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '345AAA8202', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, 'Returned by HAHIRUMUREMYI Gilbert, it was given by NSABIMANA Fabien.', '2026-02-20 15:41:58', '2026-03-02 19:13:26'),
-(53, 1, 'HP 250 G6', 'HP Laptop', 2, 'HP', '3168NGW', 'CND8400468', NULL, 'Damaged', 'Yes', 'Missing', 'No', 'N/A', 'N/A', 'Maintenance', 1, NULL, 'From Accountant Angelus IBYIMANA\r\nNo power cable reported', '2026-02-23 08:42:16', '2026-03-02 19:32:57'),
-(54, 1, 'REB/MSA-GSRMR/LT107', 'Lenovo laptop', 2, 'Lenovo', '-', 'REB/MSA-GSRMR/LT107', NULL, 'Damaged', 'Yes', 'Missing', 'No', 'N/A', 'N/A', 'Maintenance', 1, NULL, 'From HT Sr. UWIZEYIMANA Valentine\r\nNo adapter reported', '2026-02-23 10:48:56', '2026-03-02 19:32:47'),
-(56, 1, 'RTB/MSA-RMRTVET/LT03', 'HP Laptop', 2, 'HP ProBook 450 G10', '71H58AV', '5CD3286SW3', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'In Use', 2, NULL, NULL, '2026-02-24 14:36:12', '2026-03-02 18:44:03'),
-(57, 1, 'REB/MSA-GSRMR/LT064', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2266', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on', '2026-02-27 15:57:07', '2026-02-27 17:30:59'),
-(58, 1, 'REB/MSA-GSRMR/LT082', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2196', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on', '2026-02-27 15:58:16', '2026-02-27 17:31:08'),
-(59, 1, 'REB/MSA-GSRMR/LT077', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2227', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on', '2026-02-27 15:59:18', '2026-02-27 17:31:18'),
-(60, 1, 'REB/MSA-GSRMR/LT086', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2086', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on it has CMOS battery problem an keyboard', '2026-02-27 16:00:56', '2026-02-27 17:31:27'),
-(61, 1, 'REB/MSA-GSRMR/LT092', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2229', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:02:43', '2026-02-27 17:36:27'),
-(63, 1, 'REB/MSA-GSRMR/LT097', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2267', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on its battery damaged', '2026-02-27 16:04:35', '2026-02-27 17:28:01'),
-(65, 1, 'REB/MSA-GSRMR/LT054', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2170', NULL, 'Damaged', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on its screen broken.', '2026-02-27 16:06:10', '2026-02-27 17:31:49'),
-(66, 1, 'REB/MSA-GSRMR/LT072', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2243', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:09:06', NULL),
-(67, 1, 'REB/MSA-GSRMR/LT047', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '375AAA6092', NULL, 'Fair', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:11:40', '2026-02-27 17:28:53'),
-(68, 1, 'REB/MSA-GSRMR/LT088', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2226', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:12:40', '2026-02-27 17:29:11'),
-(69, 1, 'REB/MSA-GSRMR/LT048', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2163', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:14:08', '2026-02-27 17:29:33'),
-(70, 1, 'REB/MSA-GSRMR/LT093', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2129', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:15:07', '2026-02-27 17:29:45'),
-(71, 1, 'REB/MSA-GSRMR/LT091', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2161', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:16:28', '2026-02-27 17:30:08'),
-(72, 1, 'REB/MSA-GSRMR/LT078', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2106', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:17:20', '2026-02-27 17:30:21'),
-(73, 1, 'REB/MSA-GSRMR/LT087', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2123', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:18:24', '2026-02-27 17:30:47'),
-(74, 1, 'REB/MSA-GSRMR/LT096', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2xxx', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:20:40', NULL),
-(75, 1, 'REB/MSA-GSRMR/LT068', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2168', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:21:48', NULL),
-(76, 1, 'REB/MSA-GSRMR/LT056', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2203', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:22:47', NULL),
-(77, 1, 'REB/MSA-GSRMR/LT058', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA22204', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:24:02', '2026-02-27 18:08:55'),
-(78, 1, 'REB/MSA-GSRMR/LT059', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2xxx', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:26:19', NULL),
-(79, 1, 'REB/MSA-GSRMR/LT095', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2188', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:28:01', NULL),
-(80, 1, 'REB/MSA-GSRMR/LT066', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2185', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:29:09', NULL),
-(81, 1, 'REB/MSA-GSRMR/LT063', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2194', NULL, 'Fair', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Battery damaged', '2026-02-27 16:30:09', '2026-02-27 16:30:43'),
-(82, 1, 'REB/MSA-GSRMR/LT084', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2225', NULL, 'Fair', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'CMOS Battery problem and battery damaged', '2026-02-27 16:31:51', '2026-02-27 16:32:14'),
-(83, 1, 'REB/MSA-GSRMR/LT081', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2293', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:33:05', NULL),
-(84, 1, 'REB/MSA-GSRMR/LT085', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2180', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:34:47', '2026-02-27 16:35:45'),
-(85, 1, 'REB/MSA-GSRMR/LT062', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2265', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:35:37', NULL),
-(86, 1, 'REB/MSA-GSRMR/LT049', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2190', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:36:39', NULL),
-(87, 1, 'REB/MSA-GSRMR/LT067', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2251', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:37:31', NULL),
-(88, 1, 'REB/MSA-GSRMR/LT053', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2194', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Working but Its cover burned', '2026-02-27 16:39:09', '2026-02-27 16:40:16'),
-(89, 1, 'REB/MSA-GSRMR/LT073', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2199', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:40:01', NULL),
-(90, 1, 'REB/MSA-GSRMR/LT079', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2187', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:41:47', NULL),
-(91, 1, 'REB/MSA-GSRMR/LT057', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2178', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:42:36', '2026-02-27 16:43:10'),
-(92, 1, 'REB/MSA-GSRMR/LT075', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2186', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:43:44', '2026-02-27 16:48:02'),
-(97, 1, 'REB/MSA-GSRMR/LT050', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2206', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:49:10', NULL),
-(98, 1, 'REB/MSA-GSRMR/LT065', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2159', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:50:05', NULL),
-(99, 1, 'REB/MSA-GSRMR/PRJ001', 'Optoma projector', 6, 'POSITIVO', 'DASSLU', 'Q7BU915AAAAAC0822', NULL, 'Good', 'Yes', 'Working', 'Yes', '', 'Damaged', 'Available', 5, NULL, NULL, '2026-02-27 17:49:48', '2026-02-27 18:01:47'),
-(100, 1, 'REB/MSA-GSRMR/LT094', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2193', NULL, 'Good', 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 18:14:25', NULL),
-(101, 1, 'REB/MSA-GSRMR/LT099', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2yyy', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'Battery is not working.', '2026-02-27 18:29:39', NULL),
-(102, 1, 'REB/MSA-GSRMR/LT022', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2200', NULL, 'Good', 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-02-27 18:30:23', NULL);
+INSERT INTO `assets` (`id`, `school_id`, `asset_code`, `asset_name`, `category_id`, `brand`, `model`, `serial_number`, `purchase_date`, `asset_condition`, `quantity`, `qty_available`, `qty_in_use`, `qty_maintenance`, `qty_faulty`, `qty_lost`, `power_adapter`, `power_adapter_status`, `display_cable`, `display_cable_type`, `display_cable_status`, `status`, `location_id`, `image_path`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, 'REB/MSA-GSRMR/LT038', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2178', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:31:44', '2026-03-02 19:03:05'),
+(2, 1, 'REB/MSA-GSRMR/LT018', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2253', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:46:41', '2026-03-02 19:02:53'),
+(3, 1, 'REB/MSA-GSRMR/LT104', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2270', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:48:22', '2026-03-02 19:02:42'),
+(4, 1, 'REB/MSA-GSRMR/LT002', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2222', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 09:56:34', '2026-03-02 19:02:30'),
+(5, 1, 'REB/MSA-GSRMR/LT034', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2161', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:01:36', '2026-03-02 19:02:18'),
+(6, 1, 'REB/MSA-GSRMR/LT039', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2237', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:10:39', '2026-03-02 19:02:08'),
+(7, 1, 'REB/MSA-GSRMR/LT046', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2112', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:12:17', '2026-03-02 19:01:56'),
+(8, 1, 'REB/MSA-GSRMR/LT013', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2179', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:13:28', '2026-03-02 19:01:45'),
+(9, 1, 'REB/MSA-GSRMR/LT032', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2250', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:14:10', '2026-03-02 19:01:34'),
+(10, 1, 'REB/MSA-GSRMR/LT017', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2128', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:15:14', '2026-03-02 19:01:23'),
+(11, 1, 'REB/MSA-GSRMR/LT026', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2177', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:21:56', '2026-03-02 19:01:04'),
+(12, 1, 'REB/MSA-GSRMR/LT027', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2183', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:31:09', '2026-03-02 19:00:51'),
+(13, 1, 'REB/MSA-GSRMR/LT028', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2101', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 10:34:34', '2026-03-02 19:00:39'),
+(15, 1, 'REB/MSA-GSRMR/LT014', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2125', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 10:54:08', '2026-03-02 19:00:27'),
+(16, 1, 'REB/MSA-GSRMR/LT012', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2164', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:00:11', '2026-03-02 19:00:13'),
+(17, 1, 'REB/MSA-GSRMR/LT024', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2184', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 1, NULL, 'This PC doesn\'t power on.', '2026-01-28 11:01:48', '2026-03-02 19:00:02'),
+(18, 1, 'REB/MSA-GSRMR/LT001', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2223', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:04:26', '2026-03-02 18:59:44'),
+(19, 1, 'REB/MSA-GSRMR/LT011', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2114', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:07:25', '2026-03-02 18:59:30'),
+(20, 1, 'REB/MSA-GSRMR/LT009', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2210', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:10:12', '2026-03-02 18:59:17'),
+(21, 1, 'REB/MSA-GSRMR/LT042', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2240', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:15:48', '2026-03-02 18:59:03'),
+(22, 1, 'REB/MSA-GSRMR/LT098', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '305AAA1306', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, NULL, '2026-01-28 11:23:30', '2026-03-12 09:45:07'),
+(23, 1, 'REB/MSA-GSRMR/LT004', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2103', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 11:24:24', '2026-03-02 19:22:14'),
+(24, 1, 'REB/MSA-GSRMR/LT055', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2096', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:40:06', '2026-03-02 19:25:08'),
+(25, 1, 'REB/MSA-GSRMR/LT029', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2175', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:42:08', '2026-03-02 18:58:05'),
+(26, 1, 'REB/MSA-GSRMR/LT033', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2212', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:43:23', '2026-03-02 19:22:54'),
+(27, 1, 'REB/MSA-GSRMR/LT005', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2244', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:57:37', '2026-03-02 19:22:26'),
+(28, 1, 'REB/MSA-GSRMR/LT019', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2192', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:58:34', '2026-02-23 19:10:56'),
+(29, 1, 'REB/MSA-GSRMR/LT015', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2214', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 13:59:25', '2026-02-23 19:10:56'),
+(30, 1, 'REB/MSA-GSRMR/LT020', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2260', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:00:28', '2026-02-23 19:10:56'),
+(31, 1, 'REB/MSA-GSRMR/LT010', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2236', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:01:47', '2026-02-23 19:10:56'),
+(32, 1, 'REB/MSA-GSRMR/LT036', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2165', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:05:25', '2026-02-23 19:10:56'),
+(33, 1, 'REB/MSA-GSRMR/LT037', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2215', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, NULL, '2026-01-28 14:06:34', '2026-03-12 09:46:59'),
+(34, 1, 'REB/MSA-GSRMR/LT031', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2120', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:08:17', '2026-02-23 19:10:56'),
+(35, 1, 'REB/MSA-GSRMR/LT030', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2156', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'Left-click on the touchpad does not work.', '2026-01-28 14:09:03', '2026-02-23 19:10:56'),
+(36, 1, 'REB/MSA-GSRMR/LT035', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2205', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:10:06', '2026-02-23 19:10:56'),
+(37, 1, 'REB/MSA-GSRMR/LT044', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2146', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:30:21', '2026-02-23 19:10:56'),
+(38, 1, 'REB/MSA-GSRMR/LT016', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2248', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 14:33:00', '2026-02-23 19:10:56'),
+(39, 1, 'REB/MSA-GSRMR/LT043', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2167', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:33:59', '2026-02-23 19:10:56'),
+(40, 1, 'REB/MSA-GSRMR/LT040', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2217', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:35:14', '2026-02-23 19:10:56'),
+(42, 1, 'REB/MSA-GSRMR/LT041', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2066', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:37:11', '2026-02-23 19:10:56'),
+(43, 1, 'REB/MSA-GSRMR/LT003', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA1954', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:51:37', '2026-02-23 19:10:56'),
+(44, 1, 'REB/MSA-GSRMR/LT025', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2207', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:53:25', '2026-02-23 19:10:56'),
+(45, 1, 'REB/MSA-GSRMR/LT021', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2242', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 14:54:16', '2026-02-23 19:10:56'),
+(46, 1, 'REB/MSA-GSRMR/LT103', 'POSITIVO Laptop', 2, 'POSITIVO', '14CLE-I', '156AAC06353', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'The battery is damaged.', '2026-01-28 15:45:14', '2026-02-23 19:10:56'),
+(47, 1, 'REB/MSA-GSRMR/PRJ002', 'Optoma Projector', 6, 'POSITIVO', 'DASSLU', 'Q7BU915AAAAAC0357', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'Yes', 'HDMI', 'Working', 'Available', 1, NULL, NULL, '2026-01-28 15:49:19', '2026-03-02 18:51:38'),
+(48, 1, 'REB/MSA-GSRMR/PRJ01', 'BENQ Projector', 6, 'BENQ', 'M5560', 'PD9BN04142000', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'Yes', 'VGA', 'Working', 'Available', 1, NULL, NULL, '2026-01-28 16:05:28', '2026-03-02 18:50:59'),
+(49, 1, 'REB/MSA-GSRMR/LT007', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2121', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-01-28 16:53:37', '2026-02-23 19:10:56'),
+(50, 1, 'REB/MSA-GSRMR/LT045', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2221', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, NULL, '2026-02-20 14:27:24', '2026-02-23 19:10:56'),
+(51, 1, 'REB/MSA-GSRMR/LT023', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AAA2083', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, NULL, '2026-02-20 14:37:59', '2026-02-23 19:10:56'),
+(52, 1, 'REB/MSA-GSRMR/LT100', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '345AAA8202', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'In Use', 1, NULL, 'Returned by HAHIRUMUREMYI Gilbert, it was given by NSABIMANA Fabien.', '2026-02-20 15:41:58', '2026-03-02 19:13:26'),
+(53, 1, 'HP 250 G6', 'HP Laptop', 2, 'HP', '3168NGW', 'CND8400468', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Missing', 'No', 'N/A', 'N/A', 'Maintenance', 1, NULL, 'From Accountant Angelus IBYIMANA\r\nNo power cable reported', '2026-02-23 08:42:16', '2026-03-02 19:32:57'),
+(54, 1, 'REB/MSA-GSRMR/LT107', 'Lenovo laptop', 2, 'Lenovo', '-', 'REB/MSA-GSRMR/LT107', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Missing', 'No', 'N/A', 'N/A', 'Maintenance', 1, NULL, 'From HT Sr. UWIZEYIMANA Valentine\r\nNo adapter reported', '2026-02-23 10:48:56', '2026-03-02 19:32:47'),
+(56, 1, 'RTB/MSA-RMRTVET/LT03', 'HP Laptop', 2, 'HP ProBook 450 G10', '71H58AV', '5CD3286SW3', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'In Use', 2, NULL, NULL, '2026-02-24 14:36:12', '2026-03-02 18:44:03'),
+(57, 1, 'REB/MSA-GSRMR/LT064', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2266', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on', '2026-02-27 15:57:07', '2026-02-27 17:30:59'),
+(58, 1, 'REB/MSA-GSRMR/LT082', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2196', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on', '2026-02-27 15:58:16', '2026-02-27 17:31:08'),
+(59, 1, 'REB/MSA-GSRMR/LT077', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2227', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on', '2026-02-27 15:59:18', '2026-02-27 17:31:18'),
+(60, 1, 'REB/MSA-GSRMR/LT086', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2086', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on it has CMOS battery problem an keyboard', '2026-02-27 16:00:56', '2026-02-27 17:31:27'),
+(61, 1, 'REB/MSA-GSRMR/LT092', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2229', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:02:43', '2026-02-27 17:36:27'),
+(63, 1, 'REB/MSA-GSRMR/LT097', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2267', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on its battery damaged', '2026-02-27 16:04:35', '2026-02-27 17:28:01'),
+(65, 1, 'REB/MSA-GSRMR/LT054', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2170', NULL, 'Damaged', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Maintenance', 5, NULL, 'The computer can not power on its screen broken.', '2026-02-27 16:06:10', '2026-02-27 17:31:49'),
+(66, 1, 'REB/MSA-GSRMR/LT072', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2243', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:09:06', NULL),
+(67, 1, 'REB/MSA-GSRMR/LT047', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '375AAA6092', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:11:40', '2026-02-27 17:28:53'),
+(68, 1, 'REB/MSA-GSRMR/LT088', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2226', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:12:40', '2026-02-27 17:29:11'),
+(69, 1, 'REB/MSA-GSRMR/LT048', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2163', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:14:08', '2026-02-27 17:29:33'),
+(70, 1, 'REB/MSA-GSRMR/LT093', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2129', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:15:07', '2026-02-27 17:29:45'),
+(71, 1, 'REB/MSA-GSRMR/LT091', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2161', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:16:28', '2026-02-27 17:30:08'),
+(72, 1, 'REB/MSA-GSRMR/LT078', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2106', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:17:20', '2026-02-27 17:30:21'),
+(73, 1, 'REB/MSA-GSRMR/LT087', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2123', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:18:24', '2026-02-27 17:30:47'),
+(74, 1, 'REB/MSA-GSRMR/LT096', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2xxx', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:20:40', NULL),
+(75, 1, 'REB/MSA-GSRMR/LT068', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2168', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:21:48', NULL),
+(76, 1, 'REB/MSA-GSRMR/LT056', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2203', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:22:47', NULL),
+(77, 1, 'REB/MSA-GSRMR/LT058', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA22204', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:24:02', '2026-02-27 18:08:55'),
+(78, 1, 'REB/MSA-GSRMR/LT059', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2xxx', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:26:19', NULL),
+(79, 1, 'REB/MSA-GSRMR/LT095', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2188', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:28:01', NULL),
+(80, 1, 'REB/MSA-GSRMR/LT066', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2185', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:29:09', NULL),
+(81, 1, 'REB/MSA-GSRMR/LT063', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2194', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Battery damaged', '2026-02-27 16:30:09', '2026-02-27 16:30:43'),
+(82, 1, 'REB/MSA-GSRMR/LT084', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2225', NULL, 'Fair', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'CMOS Battery problem and battery damaged', '2026-02-27 16:31:51', '2026-02-27 16:32:14'),
+(83, 1, 'REB/MSA-GSRMR/LT081', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2293', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:33:05', NULL),
+(84, 1, 'REB/MSA-GSRMR/LT085', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2180', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:34:47', '2026-02-27 16:35:45'),
+(85, 1, 'REB/MSA-GSRMR/LT062', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2265', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:35:37', NULL),
+(86, 1, 'REB/MSA-GSRMR/LT049', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2190', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:36:39', NULL),
+(87, 1, 'REB/MSA-GSRMR/LT067', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2251', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:37:31', NULL),
+(88, 1, 'REB/MSA-GSRMR/LT053', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2194', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Working but Its cover burned', '2026-02-27 16:39:09', '2026-02-27 16:40:16'),
+(89, 1, 'REB/MSA-GSRMR/LT073', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2199', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:40:01', NULL),
+(90, 1, 'REB/MSA-GSRMR/LT079', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2187', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:41:47', NULL),
+(91, 1, 'REB/MSA-GSRMR/LT057', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2178', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, 'Keyboard damaged', '2026-02-27 16:42:36', '2026-02-27 16:43:10'),
+(92, 1, 'REB/MSA-GSRMR/LT075', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2186', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:43:44', '2026-02-27 16:48:02'),
+(97, 1, 'REB/MSA-GSRMR/LT050', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2206', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:49:10', NULL),
+(98, 1, 'REB/MSA-GSRMR/LT065', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2159', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 16:50:05', NULL),
+(99, 1, 'REB/MSA-GSRMR/PRJ001', 'Optoma projector', 6, 'POSITIVO', 'DASSLU', 'Q7BU915AAAAAC0822', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'Yes', '', 'Damaged', 'Available', 5, NULL, NULL, '2026-02-27 17:49:48', '2026-02-27 18:01:47'),
+(100, 1, 'REB/MSA-GSRMR/LT094', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2193', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Damaged', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-02-27 18:14:25', NULL),
+(101, 1, 'REB/MSA-GSRMR/LT099', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2yyy', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, 'Battery is not working.', '2026-02-27 18:29:39', NULL),
+(102, 1, 'REB/MSA-GSRMR/LT022', 'POSITIVO Laptop', 2, 'POSITIVO', '11CLE2-R', '076AA2200', NULL, 'Good', 1, 0, 0, 0, 0, 0, 'Yes', 'Working', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-02-27 18:30:23', NULL),
+(103, 1, 'CHAIR-001', 'Chair', 8, NULL, NULL, NULL, NULL, 'Good', 45, 0, 0, 0, 0, 0, 'No', 'N/A', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-03-12 13:37:03', NULL),
+(104, 1, 'DESK-001', 'Desk', 9, NULL, NULL, NULL, NULL, 'Good', 10, 0, 0, 0, 0, 0, 'No', 'N/A', 'No', 'N/A', 'N/A', 'Available', 1, NULL, NULL, '2026-03-12 14:11:06', NULL),
+(106, 1, 'POWER-001', 'Wall outlet', 15, NULL, NULL, NULL, NULL, 'Good', 7, 3, 0, 0, 4, 0, 'No', 'N/A', 'No', 'N/A', 'N/A', 'Faulty', 5, NULL, NULL, '2026-03-12 17:56:31', NULL),
+(107, 1, 'REB/MSA-GSRMR/SPRJ02', 'Cursor Projection screen', 11, 'Cursor', NULL, 'MSA-GSRMR/SPRJ01', NULL, 'Good', 1, 1, 0, 0, 0, 0, 'No', 'N/A', 'No', 'N/A', 'N/A', 'Available', 5, NULL, NULL, '2026-03-12 18:25:59', NULL);
 
 -- --------------------------------------------------------
 
@@ -187,7 +197,9 @@ INSERT INTO `asset_assignments` (`id`, `school_id`, `approval_status`, `approved
 (3, 1, 'approved', NULL, NULL, NULL, 51, 'Accountant', 'IBYIMANA Angelus', '2025-11-26', NULL, NULL, NULL, NULL, NULL, 'Using in daily accountant activity', 1, '2026-02-20 14:40:13'),
 (4, 1, 'approved', NULL, NULL, NULL, 53, 'Head Teacher', 'Soeur UWIZEYIMANA Valentine', '2025-09-10', '2026-02-23', '2026-02-23', NULL, NULL, NULL, NULL, 1, '2026-02-23 08:50:46'),
 (7, 1, 'approved', NULL, NULL, NULL, 52, 'DOD', 'BAHATI Adrien', '2026-02-23', '2026-04-05', NULL, NULL, NULL, NULL, 'Using it in his daily work activities', 1, '2026-02-23 18:45:49'),
-(10, 1, 'approved', 1, '2026-03-02 17:44:03', NULL, 56, 'DOS', 'NSHIMIYIMANA Joseph', '2026-02-05', NULL, NULL, NULL, NULL, NULL, 'Used in TSS daily activity', 1, '2026-03-02 18:44:03');
+(10, 1, 'approved', 1, '2026-03-02 17:44:03', NULL, 56, 'DOS', 'NSHIMIYIMANA Joseph', '2026-02-05', NULL, NULL, NULL, NULL, NULL, 'Used in TSS daily activity', 1, '2026-03-02 18:44:03'),
+(11, 1, 'approved', 4, '2026-03-12 08:45:07', NULL, 22, 'Teacher', 'BIGIRIMANA Maurice', '2026-03-11', '2026-03-12', NULL, NULL, NULL, NULL, 'District Examination preparation', 4, '2026-03-12 09:45:07'),
+(12, 1, 'approved', 4, '2026-03-12 08:46:59', NULL, 33, 'Teacher', 'HARERIMANA Emmanuel', '2026-03-06', '2026-03-30', NULL, NULL, NULL, NULL, 'Examination preparation', 4, '2026-03-12 09:46:59');
 
 -- --------------------------------------------------------
 
@@ -198,21 +210,29 @@ INSERT INTO `asset_assignments` (`id`, `school_id`, `approval_status`, `approved
 CREATE TABLE `asset_categories` (
   `id` int(10) UNSIGNED NOT NULL,
   `school_id` int(10) UNSIGNED NOT NULL,
-  `name` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL
+  `name` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('Electronic','Non-Electronic') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Electronic'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `asset_categories`
 --
 
-INSERT INTO `asset_categories` (`id`, `school_id`, `name`) VALUES
-(1, 1, 'Desktop'),
-(2, 1, 'Laptop'),
-(3, 1, 'Printer'),
-(4, 1, 'Router'),
-(5, 1, 'Switch'),
-(6, 1, 'Projector'),
-(7, 1, 'UPS');
+INSERT INTO `asset_categories` (`id`, `school_id`, `name`, `type`) VALUES
+(1, 1, 'Desktop', 'Electronic'),
+(2, 1, 'Laptop', 'Electronic'),
+(3, 1, 'Printer', 'Electronic'),
+(4, 1, 'Router', 'Electronic'),
+(5, 1, 'Switch', 'Electronic'),
+(6, 1, 'Projector', 'Electronic'),
+(7, 1, 'UPS', 'Electronic'),
+(8, 1, 'Chair', 'Non-Electronic'),
+(9, 1, 'Desk', 'Non-Electronic'),
+(10, 1, 'Multisocket', 'Non-Electronic'),
+(11, 1, 'Projection Screen', 'Electronic'),
+(12, 1, 'Whiteboard', 'Non-Electronic'),
+(13, 1, 'Other Furniture', 'Non-Electronic'),
+(15, 1, 'Power sockets', 'Non-Electronic');
 
 -- --------------------------------------------------------
 
@@ -781,7 +801,125 @@ INSERT INTO `audit_logs` (`id`, `school_id`, `user_id`, `action`, `entity`, `ent
 (539, 1, 4, 'REPORT_VIEW', 'asset_assignments', NULL, 'Viewed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-02 19:34:04'),
 (540, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-02 19:34:08'),
 (541, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-02 19:34:14'),
-(542, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-02 19:34:29');
+(542, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-02 19:34:29'),
+(543, 1, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:41:43'),
+(544, 1, 4, 'LOGIN', 'users', '4', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:42:26'),
+(545, 1, 4, 'ASSIGN_CREATE', 'asset_assignments', '11', 'Assigned asset REB/MSA-GSRMR/LT098 to Teacher: BIGIRIMANA Maurice [status: approved]', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:45:07'),
+(546, 1, 4, 'ASSIGN_CREATE', 'asset_assignments', '12', 'Assigned asset REB/MSA-GSRMR/LT037 to Teacher: HARERIMANA Emmanuel [status: approved]', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:46:59'),
+(547, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:47:58'),
+(548, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:48:17'),
+(549, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:48:32'),
+(550, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:48:32'),
+(551, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:48:47'),
+(552, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:52:11'),
+(553, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 09:53:11'),
+(554, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:05:42'),
+(555, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:06:04'),
+(556, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:18:46'),
+(557, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:19:22'),
+(558, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:23:44'),
+(559, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:23:51'),
+(560, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:24:04'),
+(561, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:24:11'),
+(562, 1, 4, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:26:02'),
+(563, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:26:23'),
+(564, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:27:04'),
+(565, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:35:28'),
+(566, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 10:59:20'),
+(567, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:12:35'),
+(568, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:12:39'),
+(569, 1, 4, 'REPORT_VIEW', 'asset_assignments', NULL, 'Viewed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:15:12'),
+(570, 1, 4, 'REPORT_VIEW', 'asset_assignments', NULL, 'Viewed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:15:12'),
+(571, 1, 4, 'REPORT_PRINT', 'asset_assignments', NULL, 'Printed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:15:15'),
+(572, 1, 4, 'REPORT_VIEW', 'asset_assignments', NULL, 'Viewed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:16:39'),
+(573, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:16:50'),
+(574, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:16:50'),
+(575, 1, 4, 'REPORT_PRINT', 'maintenance_logs', NULL, 'Printed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:17:03'),
+(576, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:18:02'),
+(577, 1, 4, 'MAINT_UPDATE', 'maintenance_logs', '3', 'Updated maintenance status for asset REB/MSA-GSRMR/LT107 to Open', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:18:54'),
+(578, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:19:13'),
+(579, 1, 4, 'MAINT_UPDATE', 'maintenance_logs', '3', 'Updated maintenance status for asset REB/MSA-GSRMR/LT107 to Open', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:19:49'),
+(580, 1, 4, 'MAINT_UPDATE', 'maintenance_logs', '2', 'Updated maintenance status for asset HP 250 G6 to Open', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:19:58'),
+(581, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:20:01'),
+(582, 1, 4, 'REPORT_PRINT', 'maintenance_logs', NULL, 'Printed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:20:09'),
+(583, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:20:33'),
+(584, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:20:33'),
+(585, 1, 4, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:33:43'),
+(586, 1, 4, 'REPORT_PRINT', 'maintenance_logs', NULL, 'Printed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:33:46'),
+(587, 1, 4, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:36:46'),
+(588, 1, 4, 'LOGIN', 'users', '4', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0', '2026-03-12 11:41:28'),
+(589, 1, 4, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0', '2026-03-12 11:42:59'),
+(590, 1, 4, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:44:06'),
+(591, 1, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:52:09'),
+(592, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:56:26'),
+(593, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:56:47'),
+(594, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 11:57:04'),
+(595, 1, 1, 'REPORT_VIEW', 'maintenance_logs', NULL, 'Viewed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 12:41:05'),
+(596, 1, 1, 'ASSET_CREATE', 'assets', '103', 'Created asset CHAIR-001', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 13:37:03'),
+(597, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 13:59:40'),
+(598, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:07:33'),
+(599, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:07:36'),
+(600, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:07:47'),
+(601, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:07:54'),
+(602, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:07:57'),
+(603, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:08:20'),
+(604, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:08:33'),
+(605, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:08:53'),
+(606, 1, 1, 'ASSET_CREATE', 'assets', '104', 'Created asset DESK-001', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:11:06'),
+(607, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:23:22'),
+(608, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:23:27'),
+(609, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:23:42'),
+(610, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:23:46'),
+(611, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:26:10'),
+(612, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:26:17'),
+(613, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:26:24'),
+(614, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:26:50'),
+(615, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:36:22'),
+(616, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:36:39'),
+(617, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:38:38'),
+(618, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:38:47'),
+(619, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:38:50'),
+(620, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:39:32'),
+(621, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:39:32'),
+(622, 1, 1, 'REPORT_VIEW', 'assets', NULL, 'Viewed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:39:47'),
+(623, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:48:08'),
+(624, 1, 1, 'REPORT_VIEW', 'asset_assignments', NULL, 'Viewed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:48:24'),
+(625, 1, 1, 'REPORT_PRINT', 'asset_assignments', NULL, 'Printed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:48:27'),
+(626, 1, 1, 'REPORT_VIEW', 'asset_assignments', NULL, 'Viewed assignments report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:48:35'),
+(627, 1, 1, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:48:41'),
+(628, 1, 4, 'LOGIN', 'users', '4', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:50:14'),
+(629, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:50:41'),
+(630, 1, 4, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 14:51:35'),
+(631, 1, 4, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 15:00:47'),
+(632, 1, 4, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 15:01:18'),
+(633, 1, 4, 'REPORT_PRINT', 'maintenance_logs', NULL, 'Printed maintenance report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:06:10'),
+(634, 1, 3, 'LOGIN', 'users', '3', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:07:02'),
+(635, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:07:18'),
+(636, 1, 3, 'ASSET_CREATE', 'assets', '105', 'Created asset MULTISOCKET-001', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:25:01'),
+(637, 1, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:30:40'),
+(638, 1, 1, 'CATEGORY_CREATE', 'asset_categories', '15', 'Created category: Power sockets', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:33:32'),
+(639, 1, 3, 'LOGIN', 'users', '3', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:33:58'),
+(640, 1, 3, 'ASSET_UPDATE', 'assets', '105', 'Updated asset POWERSOCKET-001', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:35:59'),
+(641, 1, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:53:52'),
+(642, 1, 1, 'CATEGORY_UPDATE', 'asset_categories', '1', 'Updated category to: Desktop', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:54:10'),
+(643, 1, 1, 'CATEGORY_UPDATE', 'asset_categories', '15', 'Updated category to: Power sockets', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:54:23'),
+(644, 1, 3, 'LOGIN', 'users', '3', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:54:37'),
+(645, 1, 3, 'ASSET_CREATE', 'assets', '106', 'Created asset POWER-001', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 17:56:31'),
+(646, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:00:19'),
+(647, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:02:03'),
+(648, 1, 3, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:02:35'),
+(649, 1, 3, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:05:25'),
+(650, 1, 3, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:06:51'),
+(651, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed inventory report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:07:40'),
+(652, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:08:16'),
+(653, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:17:41'),
+(654, 1, 3, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:18:09'),
+(655, 1, 3, 'REPORT_PRINT', 'inventory_summary', NULL, 'Printed inventory summary report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:19:39'),
+(656, 1, 3, 'REPORT_PRINT', 'assets', NULL, 'Printed non-electronic report', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:20:00'),
+(657, 1, 1, 'LOGIN', 'users', '1', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:22:49'),
+(658, 1, 1, 'CATEGORY_UPDATE', 'asset_categories', '11', 'Updated category to: Projection Screen', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:23:02'),
+(659, 1, 3, 'LOGIN', 'users', '3', 'User logged in', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:23:13'),
+(660, 1, 3, 'ASSET_CREATE', 'assets', '107', 'Created asset REB/MSA-GSRMR/SPRJ02', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 18:25:59');
 
 -- --------------------------------------------------------
 
@@ -833,8 +971,8 @@ CREATE TABLE `maintenance_logs` (
 
 INSERT INTO `maintenance_logs` (`id`, `school_id`, `asset_id`, `issue_description`, `reported_date`, `resolved_date`, `action_taken`, `technician_name`, `cost`, `status`, `created_by`, `created_at`) VALUES
 (1, 1, 17, 'The laptop powers on briefly when the power button is pressed but shows no display and shuts down after a few seconds, even after multiple attempts.', '2026-01-28', NULL, '', NULL, NULL, 'Open', 1, '2026-01-28 11:36:01'),
-(2, 1, 53, 'The cover of this laptop has unfortunately been damaged and needs replacement.', '2026-02-23', NULL, '', NULL, '80000.00', 'Open', 1, '2026-02-23 09:07:45'),
-(3, 1, 54, 'The cover of this laptop has unfortunately been damaged and needs replacement.', '2026-02-23', NULL, NULL, NULL, NULL, 'Open', 1, '2026-02-23 10:51:48'),
+(2, 1, 53, 'The cover of this laptop has unfortunately been damaged and needs replacement.', '2026-02-23', NULL, NULL, 'Private technician', '80000.00', 'Open', 1, '2026-02-23 09:07:45'),
+(3, 1, 54, 'The cover of this laptop has unfortunately been damaged and needs replacement.', '2026-02-23', NULL, NULL, 'Private technician', '80000.00', 'Open', 1, '2026-02-23 10:51:48'),
 (4, 1, 56, 'The computer screen has broken, need replacement.', '2026-02-01', '2026-02-05', 'The screen has been replaced.', 'Private Technician', '150000.00', 'Resolved', 1, '2026-02-24 14:40:57'),
 (5, 1, 65, 'The computer can not power on its screen broken.', '2026-02-27', NULL, NULL, NULL, NULL, 'Open', 3, '2026-02-27 17:33:35'),
 (6, 1, 57, 'The computer can not power on', '2026-02-27', NULL, NULL, NULL, NULL, 'Open', 3, '2026-02-27 17:34:04'),
@@ -912,10 +1050,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `school_id`, `role_id`, `location_id`, `username`, `full_name`, `email`, `password_hash`, `is_active`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 4, NULL, 'admin', 'TWIZEYIMANA Elie', 'twizeyimana1elia@gmail.com', '$2y$10$ncXUzMfqM8vOawGq2LEpq.75sQp2HD3KX2X0gcIZd12skJ8Fu6sAy', 1, '2026-03-02 19:16:40', '2026-01-28 06:54:42', '2026-03-02 19:16:40'),
+(1, 1, 4, NULL, 'admin', 'TWIZEYIMANA Elie', 'twizeyimana1elia@gmail.com', '$2y$10$ncXUzMfqM8vOawGq2LEpq.75sQp2HD3KX2X0gcIZd12skJ8Fu6sAy', 1, '2026-03-12 18:22:49', '2026-01-28 06:54:42', '2026-03-12 18:22:49'),
 (2, 1, 2, NULL, 'Peter', 'TUYIZERE Peter', NULL, '$2y$10$HHwK45P7cjtTuYgZ6ybopeX2qxH/dnCzioXzEOZyT9krOY9L8J7va', 1, '2026-02-24 14:25:53', '2026-01-28 16:22:38', '2026-02-24 14:25:53'),
-(3, 1, 1, 5, 'Vedaste', 'HAKIZIMANA Vedaste', NULL, '$2y$10$AExt42s5OVKRWr6GPvq6Dee9jDLLf1.HBe8AbWbcWDG0eC4XVlILa', 1, '2026-02-27 15:43:13', '2026-02-27 15:39:56', '2026-02-27 15:43:13'),
-(4, 1, 1, 1, 'Elie', 'Elie TWIZEYIMANA', 'twizeyimana13elia@gmail.com', '$2y$10$fQfD9pqZPiTCQHPNrSulou1xZEVB55l.ULm8whd4OxgDc8pQXo/pC', 1, '2026-03-02 19:29:05', '2026-03-02 19:03:50', '2026-03-02 19:29:05');
+(3, 1, 1, 5, 'Vedaste', 'HAKIZIMANA Vedaste', NULL, '$2y$10$AExt42s5OVKRWr6GPvq6Dee9jDLLf1.HBe8AbWbcWDG0eC4XVlILa', 1, '2026-03-12 18:23:13', '2026-02-27 15:39:56', '2026-03-12 18:23:13'),
+(4, 1, 1, 1, 'Elie', 'Elie TWIZEYIMANA', 'twizeyimana13elia@gmail.com', '$2y$10$fQfD9pqZPiTCQHPNrSulou1xZEVB55l.ULm8whd4OxgDc8pQXo/pC', 1, '2026-03-12 14:50:14', '2026-03-02 19:03:50', '2026-03-12 14:50:14');
 
 --
 -- Indexes for dumped tables
@@ -1004,25 +1142,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assets`
 --
 ALTER TABLE `assets`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `asset_assignments`
 --
 ALTER TABLE `asset_assignments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `asset_categories`
 --
 ALTER TABLE `asset_categories`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=543;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=661;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -1052,7 +1190,7 @@ ALTER TABLE `schools`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables

@@ -127,7 +127,7 @@ layout_header('Assets', 'assets');
         </thead>
         <tbody>
           <?php if (!$assets): ?>
-            <tr><td colspan="6" class="text-center text-secondary py-4">No assets found.</td></tr>
+            <tr><td colspan="7" class="text-center text-secondary py-4">No assets found.</td></tr>
           <?php endif; ?>
           <?php foreach ($assets as $a): ?>
             <tr>
@@ -143,22 +143,27 @@ layout_header('Assets', 'assets');
               </td>
               <td><?php echo htmlspecialchars($a['category_name']); ?></td>
               <td>
-                <?php if ($a['power_adapter'] === 'Yes'): ?>
+                <?php
+                  // Determine if the category is non-electronic (no cable/adapter info)
+                  $catLower = strtolower($a['category_name']);
+                  $nonElec = preg_match('/chair|desk|multisocket|projection screen|whiteboard|other furniture|furniture|curtain|cabinet|fire extinguisher/', $catLower);
+                ?>
+                <?php if (!$nonElec && $a['power_adapter'] === 'Yes'): ?>
                   <div class="mb-1">
                     <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
                       <i class="bi bi-plug"></i> Power (<?php echo htmlspecialchars($a['power_adapter_status']); ?>)
                     </span>
                   </div>
                 <?php endif; ?>
-                <?php if ($a['display_cable'] === 'Yes'): ?>
+                <?php if (!$nonElec && $a['display_cable'] === 'Yes'): ?>
                   <div>
                     <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle">
                       <i class="bi bi-hdmi"></i> <?php echo htmlspecialchars($a['display_cable_type']); ?> (<?php echo htmlspecialchars($a['display_cable_status']); ?>)
                     </span>
                   </div>
                 <?php endif; ?>
-                <?php if ($a['power_adapter'] !== 'Yes' && $a['display_cable'] !== 'Yes'): ?>
-                  <span class="text-secondary small">None</span>
+                <?php if ($nonElec || ($a['power_adapter'] !== 'Yes' && $a['display_cable'] !== 'Yes')): ?>
+                  <span class="text-secondary small">-</span>
                 <?php endif; ?>
               </td>
               <td>

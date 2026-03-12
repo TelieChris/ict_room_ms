@@ -25,11 +25,29 @@ layout_header('Reports Dashboard', 'reports');
         <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
           <i class="bi bi-box-seam fs-3"></i>
         </div>
-        <h4 class="h5 fw-bold mb-2">Asset Inventory</h4>
+        <h4 class="h5 fw-bold mb-2">ICT Equipment</h4>
         <p class="text-secondary small mb-4 flex-grow-1">
-          Comprehensive overview of all physical hardware, their conditions, current locations, and operational status.
+          Comprehensive overview of physical hardware (electronic/ICT only), their conditions, and operational status.
         </p>
         <a href="<?php echo htmlspecialchars(url('/reports/inventory.php')); ?>" class="btn btn-primary w-100 fw-semibold rounded-pill">
+          View Report <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Non-Electronic Report Card -->
+  <div class="col-12 col-md-4">
+    <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+      <div class="card-body p-4 d-flex flex-column">
+        <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+          <i class="bi bi-lamp fs-3"></i>
+        </div>
+        <h4 class="h5 fw-bold mb-2">Non-Electronic Assets</h4>
+        <p class="text-secondary small mb-4 flex-grow-1">
+          Inventory of furniture and other non-electronic assets, including quantities and conditions.
+        </p>
+        <a href="<?php echo htmlspecialchars(url('/reports/non_electronic.php')); ?>" class="btn btn-outline-warning w-100 fw-semibold rounded-pill">
           View Report <i class="bi bi-arrow-right ms-2"></i>
         </a>
       </div>
